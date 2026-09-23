@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Creator Program Automation</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJz48cmVjdCB3aWR0aD0nMTAwJyBoZWlnaHQ9JzEwMCcgcng9JzI0JyBmaWxsPScjMDAwJy8+PHJlY3QgeD0nMjknIHk9JzIzJyB3aWR0aD0nMTQnIGhlaWdodD0nNTQnIHJ4PSc0JyBmaWxsPScjZmZmJy8+PHJlY3QgeD0nNTcnIHk9JzIzJyB3aWR0aD0nMTQnIGhlaWdodD0nNTQnIHJ4PSc0JyBmaWxsPScjZmZmJy8+PC9zdmc+">
+<style>
+  :root{
+    --bg:#000; --panel:#0a0a0b; --panel2:#101012; --line:#1e1e22; --line2:#2a2a30;
+    --fg:#fafafa; --muted:#8a8a91; --dim:#5a5a61;
+    --ok:#4ade80; --warn:#fbbf24; --bad:#f87171; --accent:#fff;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--fg);
+    font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1320px; margin:0 auto; padding:44px 28px 120px}
+
+  .brand{font-size:34px; font-weight:800; letter-spacing:-.04em; margin:0 0 6px}
+  .brand span{color:var(--dim); font-weight:800}
+  .lede{color:var(--muted); font-size:14.5px; max-width:760px}
+  .lede b{color:var(--fg); font-weight:500}
+  header{padding-bottom:28px; border-bottom:1px solid var(--line)}
+
+  .colhead{
+    display:grid; grid-template-columns:42% 58%; gap:0;
+    position:sticky; top:0; background:var(--bg); z-index:5;
+    border-bottom:1px solid var(--line);
+  }
+  .colhead div{
+    font-size:11px; text-transform:uppercase; letter-spacing:.11em; color:var(--dim);
+    padding:14px 0 12px;
+  }
+  .colhead div:last-child{padding-left:28px; border-left:1px solid var(--line)}
+
+  .row{
+    display:grid; grid-template-columns:42% 58%; gap:0;
+    border-bottom:1px solid var(--line);
+  }
+  .task{padding:26px 28px 30px 0}
+  .sol{padding:26px 0 30px 28px; border-left:1px solid var(--line)}
+
+  .tlabel{font-weight:600; letter-spacing:-.01em; margin-bottom:4px}
+  .tbody{color:var(--muted); font-size:14px}
+
+  button{
+    background:var(--accent); color:#000; border:0; border-radius:9px;
+    padding:11px 20px; font:inherit; font-weight:600; font-size:13.5px; cursor:pointer;
+    white-space:nowrap;
+  }
+  button:disabled{opacity:.4; cursor:default}
+  .ghost{
+    background:none; border:1px solid var(--line2); color:var(--muted);
+    font-size:11px; font-weight:400; text-transform:uppercase; letter-spacing:.09em;
+    padding:7px 12px; border-radius:7px;
+  }
+  .ghost:hover{color:var(--fg); border-color:#3a3a42}
+
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:13px}
+  .note{padding:16px 18px; color:var(--muted); font-size:13.5px}
+  .note.bad{color:var(--bad)} .note.warn{color:var(--warn)}
+  .hide{display:none}
+  .mt{margin-top:14px}
+
+  form{display:grid; grid-template-columns:1fr 130px 104px auto; gap:10px; align-items:end; padding:16px 18px 0}
+  .labelrow{display:flex; justify-content:space-between; align-items:baseline; gap:10px}
+  label{display:block; font-size:10.5px; text-transform:uppercase; letter-spacing:.09em; color:var(--dim); margin-bottom:6px}
+  input,select{
+    width:100%; background:var(--panel2); color:var(--fg);
+    border:1px solid var(--line); border-radius:8px; padding:10px 11px;
+    font:inherit; font-size:13.5px; outline:none;
+  }
+  input:focus,select:focus{border-color:#3a3a42}
+  .linkbtn{
+    background:none; border:0; padding:0; margin-bottom:6px; border-radius:0;
+    color:var(--muted); font:inherit; font-size:10.5px; font-weight:400;
+    text-transform:uppercase; letter-spacing:.09em; cursor:pointer;
+  }
+  .linkbtn:hover{color:var(--fg)}
+  .briefnote{padding:12px 18px 16px; color:var(--dim); font-size:12px; line-height:1.5}
+  .briefnote b{color:var(--muted); font-weight:500}
+
+  .status{font-size:11.5px; color:var(--dim); font-variant-numeric:tabular-nums; margin-left:12px}
+
+  .headline{font-weight:600; letter-spacing:-.01em; padding:16px 18px 0}
+  .detail{color:var(--muted); font-size:13px; padding:6px 18px 0; line-height:1.5}
+  .chips{display:flex; flex-wrap:wrap; gap:8px; padding:14px 18px 0}
+  .chip{
+    background:var(--panel2); border:1px solid var(--line); border-radius:7px;
+    padding:6px 10px; font-size:11.5px; color:var(--muted); font-variant-numeric:tabular-nums;
+  }
+  .chip b{color:var(--fg); font-weight:600; margin-left:5px}
+  .padb{padding-bottom:18px}
+  .sw{display:flex; align-items:center; gap:10px; padding:16px 18px 0; font-size:13px; font-weight:700; letter-spacing:.1em}
+  .sw i{width:12px; height:12px; border-radius:50%; background:currentColor; box-shadow:0 0 12px currentColor}
+
+  .tablewrap{overflow-x:auto; padding:14px 18px 4px}
+  table{border-collapse:collapse; width:100%; font-size:12.5px; font-variant-numeric:tabular-nums}
+  th{
+    text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:.08em;
+    color:var(--dim); font-weight:400; padding:0 14px 8px 0; white-space:nowrap;
+  }
+  td{padding:7px 14px 7px 0; border-top:1px solid var(--line); color:var(--muted); white-space:nowrap}
+  td:first-child{color:var(--fg)}
+  td a{color:var(--dim); text-decoration:none}
+  td a:hover{color:var(--fg)}
+
+  pre{
+    margin:14px 18px 4px; padding:14px; background:var(--panel2);
+    border:1px solid var(--line); border-radius:9px;
+    font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    color:var(--muted); white-space:pre-wrap; max-height:260px; overflow:auto;
+  }
+  .out{display:block; margin:14px 18px 4px; font-size:12.5px; color:var(--ok); text-decoration:none}
+  .out:hover{text-decoration:underline}
+
+  .stage{
+    display:grid; grid-template-columns:20px 1fr auto auto; gap:12px; align-items:center;
+    padding:10px 18px; border-bottom:1px solid var(--line);
+    opacity:0; transform:translateY(-3px); animation:in .2s ease forwards;
+  }
+  .stage:last-child{border-bottom:0}
+  @keyframes in{ to{opacity:1;transform:none} }
+  .mark{font-size:12px; text-align:center}
+  .mark.ok{color:var(--ok)} .mark.skip{color:var(--dim)} .mark.bad{color:var(--bad)}
+  .sname{font-weight:500; font-size:13.5px}
+  .sdetail{color:var(--muted); font-size:12.5px; font-variant-numeric:tabular-nums}
+  .sms{color:var(--dim); font-size:11.5px; font-variant-numeric:tabular-nums; min-width:48px; text-align:right}
+
+  .tiles{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:12px}
+  .tile{padding:14px 16px}
+  .tval{font-size:22px; font-weight:600; letter-spacing:-.02em; font-variant-numeric:tabular-nums}
+  .tlab{font-size:10.5px; text-transform:uppercase; letter-spacing:.09em; color:var(--dim); margin-top:4px}
+
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:10px; margin-top:12px}
+  .cr{padding:15px 16px; display:flex; flex-direction:column; gap:9px}
+  .crtop{display:flex; justify-content:space-between; align-items:flex-start; gap:10px}
+  .handle{font-weight:600; font-size:13.5px}
+  .fol{color:var(--muted); font-size:12px; margin-top:2px; font-variant-numeric:tabular-nums}
+  .score{font-size:19px; font-weight:600; font-variant-numeric:tabular-nums; line-height:1}
+  .bar{height:3px; background:#17171a; border-radius:2px; overflow:hidden}
+  .bar i{display:block; height:100%; border-radius:2px}
+  .why{color:var(--muted); font-size:12.5px; line-height:1.45}
+  .crlinks{display:flex; gap:12px; flex-wrap:wrap}
+  .crlink{font-size:11.5px; color:var(--dim); text-decoration:none}
+  .crlink:hover{color:var(--fg)}
+  .crlink.mail{color:var(--ok)}
+
+  .inv{padding:16px 18px; display:grid; gap:9px}
+  .invrow{display:grid; grid-template-columns:150px 1fr; gap:14px; font-size:12.5px}
+  .invrow span:first-child{color:var(--dim)}
+  .invrow span:last-child{color:var(--muted); font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:11.5px}
+
+  @media(max-width:920px){
+    .colhead,.row{grid-template-columns:1fr}
+    .colhead div:last-child,.sol{border-left:0; padding-left:0}
+    .task{padding-right:0; padding-bottom:12px}
+    .sol{padding-top:0}
+    .tiles{grid-template-columns:repeat(2,1fr)}
+    form{grid-template-columns:1fr}
+    .wrap{padding:28px 18px 80px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1 class="brand">II<span>ElevenLabs</span></h1>
+    <div class="lede">Everything this role asks for is on the left.
+      <b>On the right, a button that actually does it.</b></div>
+  </header>
+
+  <div class="colhead"><div>The task</div><div>The automation</div></div>
+  <div id="rows"></div>
+
+</div>
+
+<script>
+(function(){
+  var ORIGIN = window.location.protocol.indexOf('http') === 0 ? window.location.origin : 'https://n8n.aiblackops.xyz';
+
+  var BRIEFS = [
+    { kw:'#seedance',         min:10000, why:'ElevenLabs’ own 2026 campaign hashtag for the Seedance video generator.' },
+    { kw:'AI voice',          min:5000,  why:'The core category they dominate, used heavily across their own creative.' },
+    { kw:'faceless channel',  min:20000, why:'Straight from their ad angle: start and scale a faceless channel for passive income.' },
+    { kw:'ElevenCreative',    min:3000,  why:'Finds creators already talking about their speech, music and video platform.' },
+    { kw:'ElevenAgents',      min:5000,  why:'Their voice agent platform — the B2B and developer creator angle.' },
+    { kw:'voice cloning',     min:10000, why:'A flagship use case and a recurring content theme around the brand.' },
+    { kw:'text to speech AI', min:5000,  why:'The primary search term for their main product.' },
+    { kw:'AI voiceover',      min:10000, why:'Category term running through most of their marketing.' },
+    { kw:'AI tools',          min:20000, why:'Their tracked creator partnerships sit almost entirely in AI tooling.' },
+    { kw:'tech creator',      min:20000, why:'The broader niche their existing collaborations are drawn from.' }
+  ];
+
+  var SECTIONS = [
+    { id:'discovery', kind:'discovery',
+      label:'Creator discovery',
+      task:'build automations that query social platforms and databases for profiles matching brand keywords and follower thresholds' },
+
+    { id:'crm', label:'CRM data sync',
+      task:'automatically push new influencer profiles and contact details into the team’s database',
+      btn:'Show what landed in the database', path:'/webhook/program/crm',
+      clear:{ btn:'Clear the table', path:'/webhook/program/crm-clear', confirm:'Delete every creator in the CRM?' } },
+
+    { id:'onboarding', label:'Onboarding',
+      task:'send automated welcome packets, brand guidelines, and brief templates when a creator joins',
+      btn:'Send the welcome packet', path:'/webhook/program/onboarding',
+      body:{ handle:'valentinloiseau.ai' } },
+
+    { id:'contract', label:'Contract generation',
+      task:'auto-fill creator names, dates, and payout rates into legal templates from form data, and route for e-signature',
+      btn:'Generate and deliver the contract', path:'/webhook/program/contract',
+      body:{ handle:'valentinloiseau.ai', followers:1400000 } },
+
+    { id:'reminder', label:'Content reminders',
+      task:'trigger automated Slack messages or emails to creators before posting deadlines',
+      btn:'Send the deadline reminder', path:'/webhook/program/reminder',
+      body:{ handle:'kapwing', hours:48 } },
+
+    { id:'tracking', label:'Content tracking',
+      task:'use APIs to log when an influencer posts and capture live links automatically',
+      btn:'Log new posts and capture links', path:'/webhook/program/tracking', slow:true },
+
+    { id:'aggregate', label:'Data aggregation',
+      task:'pull views, likes, comments, and clicks from social APIs into a central dashboard',
+      btn:'Pull the numbers into the dashboard', path:'/webhook/program/aggregate' },
+
+    { id:'report', label:'Report generation',
+      task:'produce weekly and monthly performance spreadsheets without manual data entry',
+      btn:'Build the weekly spreadsheet', path:'/webhook/program/report', slow:true },
+
+    { id:'integrations', kind:'static', label:'Integrations and webhooks',
+      task:'build and maintain the integrations and webhook triggers that connect social platforms, CRM, finance, Slack, and e-signature tools' },
+
+    { id:'reliability', label:'Own reliability',
+      task:'error handling, monitoring, secrets management, and audit trails so automations run cleanly and securely',
+      btn:'Flip the kill switch', path:'/webhook/program/killswitch' }
+  ];
+
+  var INVENTORY = [
+    ['Social data', 'Apify → TikTok scraper actor'],
+    ['Scoring', 'OpenAI responses API, JSON mode'],
+    ['CRM', 'Airtable — Creators, Metrics, Settings'],
+    ['Spreadsheets', 'Google Sheets API v4'],
+    ['Messaging', 'Telegram bot — packets, contracts, alerts'],
+    ['Inbound', '8 webhook endpoints on this host'],
+    ['Secrets', 'n8n credential store, nothing in workflow JSON'],
+    ['Failure path', 'Global error workflow → Telegram']
+  ];
+
+  function el(tag, cls, html){
+    var e = document.createElement(tag);
+    if(cls) e.className = cls;
+    if(html !== undefined) e.innerHTML = html;
+    return e;
+  }
+  function esc(s){ var d=document.createElement('div'); d.textContent=(s===null||s===undefined)?'':String(s); return d.innerHTML; }
+  function num(n){ return (n===null||n===undefined||isNaN(n)) ? '—' : Number(n).toLocaleString('en-US'); }
+  function scoreColor(v){ return v>=75?'var(--ok)':v>=50?'var(--warn)':'var(--bad)'; }
+
+  function renderPanel(target, d){
+    target.innerHTML = '';
+    var card = el('div','card');
+    if(d.action === 'killswitch'){
+      var halted = d.enabled === true;
+      var col = halted ? 'var(--bad)' : 'var(--ok)';
+      card.style.borderColor = col;
+      var sw = el('div','sw','<i></i>' + (halted ? 'HALTED' : 'RUNNING'));
+      sw.style.color = col;
+      card.appendChild(sw);
+    }
+    card.appendChild(el('div','headline', esc(d.headline || 'Done')));
+    if(d.detail) card.appendChild(el('div','detail', esc(d.detail)));
+
+    if(d.meta && d.meta.length){
+      var chips = el('div','chips');
+      d.meta.forEach(function(m){
+        chips.appendChild(el('div','chip', esc(m.k) + '<b>' + esc(m.v) + '</b>'));
+      });
+      card.appendChild(chips);
+    }
+
+    if(d.table && d.table.rows && d.table.rows.length){
+      var tw = el('div','tablewrap');
+      var t = el('table');
+      var thead = el('thead'); var htr = el('tr');
+      d.table.columns.forEach(function(c){ htr.appendChild(el('th', null, esc(c))); });
+      thead.appendChild(htr); t.appendChild(thead);
+      var tb = el('tbody');
+      d.table.rows.forEach(function(r){
+        var tr = el('tr');
+        r.forEach(function(v){
+          var s = String(v === null || v === undefined ? '' : v);
+          if(s.indexOf('http') === 0){
+            tr.appendChild(el('td', null, '<a href="'+esc(s)+'" target="_blank" rel="noopener">open ↗</a>'));
+          } else {
+            tr.appendChild(el('td', null, esc(s)));
+          }
+        });
+        tb.appendChild(tr);
+      });
+      t.appendChild(tb); tw.appendChild(t); card.appendChild(tw);
+    }
+
+    if(d.link && d.link.url){
+      var a = el('a','out', esc(d.link.label || 'Open') + ' ↗');
+      a.href = d.link.url; a.target = '_blank'; a.rel = 'noopener';
+      card.appendChild(a);
+    }
+
+    if(d.body){
+      card.appendChild(el('pre', null, esc(d.body)));
+    }
+
+    card.appendChild(el('div','padb'));
+    target.appendChild(card);
+  }
+
+  function renderError(target, msg){
+    target.innerHTML = '';
+    var card = el('div','card');
+    card.appendChild(el('div','note bad', esc(msg)));
+    target.appendChild(card);
+  }
+
+  function wireAction(sec, btn, status, out){
+    btn.addEventListener('click', function(){
+      if(sec.confirm && !window.confirm(sec.confirm)) return;
+      btn.disabled = true;
+      var t0 = Date.now();
+      status.textContent = sec.slow ? 'running, this one hits a live API…' : 'running…';
+      var timer = setInterval(function(){
+        status.textContent = 'running · ' + ((Date.now()-t0)/1000).toFixed(1) + 's';
+      }, 100);
+
+      fetch(ORIGIN + sec.path, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(sec.body || {})
+      })
+      .then(function(r){ return r.json().catch(function(){ throw new Error('Workflow returned a non-JSON response (HTTP '+r.status+').'); }); })
+      .then(function(d){
+        clearInterval(timer);
+        status.textContent = 'done in ' + ((Date.now()-t0)/1000).toFixed(1) + 's';
+        renderPanel(out, d);
+      })
+      .catch(function(err){
+        clearInterval(timer);
+        status.textContent = 'failed';
+        renderError(out, String(err && err.message ? err.message : err));
+      })
+      .then(function(){ btn.disabled = false; });
+    });
+  }
+
+  function buildDiscovery(sol){
+    var card = el('div','card');
+    card.innerHTML =
+      '<form>' +
+        '<div>' +
+          '<div class="labelrow">' +
+            '<label>Keyword</label>' +
+            '<button type="button" class="linkbtn" data-role="suggest">Suggest a brief</button>' +
+          '</div>' +
+          '<input data-role="kw" value="AI voice" autocomplete="off" spellcheck="false">' +
+        '</div>' +
+        '<div><label>Min followers</label><select data-role="mf">' +
+          '<option value="1000">1,000</option><option value="3000">3,000</option>' +
+          '<option value="5000" selected>5,000</option><option value="10000">10,000</option>' +
+          '<option value="20000">20,000</option><option value="50000">50,000</option>' +
+          '<option value="100000">100,000</option></select></div>' +
+        '<div><label>Cap</label><select data-role="mr">' +
+          '<option value="10">10</option><option value="20">20</option>' +
+          '<option value="40" selected>40</option></select></div>' +
+        '<button type="submit" data-role="go">Run discovery</button>' +
+      '</form>' +
+      '<div class="briefnote" data-role="brief"></div>';
+    sol.appendChild(card);
+
+    var out = el('div','mt');
+    sol.appendChild(out);
+
+    var kw = card.querySelector('[data-role=kw]');
+    var mf = card.querySelector('[data-role=mf]');
+    var mr = card.querySelector('[data-role=mr]');
+    var go = card.querySelector('[data-role=go]');
+    var brief = card.querySelector('[data-role=brief]');
+    var form = card.querySelector('form');
+    var last = 1;
+
+    function setBrief(i){
+      last = i;
+      kw.value = BRIEFS[i].kw;
+      mf.value = String(BRIEFS[i].min);
+      brief.innerHTML = '<b>Why this brief:</b> ' + esc(BRIEFS[i].why);
+    }
+    setBrief(1);
+    card.querySelector('[data-role=suggest]').addEventListener('click', function(){
+      var i; do { i = Math.floor(Math.random()*BRIEFS.length); } while (i === last);
+      setBrief(i);
+    });
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var body = { keyword: kw.value.trim(), minFollowers: parseInt(mf.value,10), maxResults: parseInt(mr.value,10) };
+      if(!body.keyword) return;
+      go.disabled = true;
+      var t0 = Date.now();
+      out.innerHTML = '<div class="card"><div class="note">Running the pipeline…</div></div>';
+      var timer = setInterval(function(){
+        var n = out.querySelector('.note');
+        if(n) n.textContent = 'Running the pipeline · ' + ((Date.now()-t0)/1000).toFixed(1) + 's';
+      }, 100);
+
+      fetch(ORIGIN + '/webhook/creator-discovery/run', {
+        method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        clearInterval(timer);
+        renderDiscovery(out, d, ((Date.now()-t0)/1000).toFixed(1));
+      })
+      .catch(function(err){
+        clearInterval(timer);
+        renderError(out, String(err && err.message ? err.message : err));
+      })
+      .then(function(){ go.disabled = false; });
+    });
+  }
+
+  function renderDiscovery(out, d, secs){
+    out.innerHTML = '';
+
+    var stages = el('div','card');
+    (d.stages || []).forEach(function(s,i){
+      var cls = s.status==='skipped' ? 'skip' : (s.status==='failed' ? 'bad' : 'ok');
+      var mk  = s.status==='skipped' ? '–' : (s.status==='failed' ? '×' : '✓');
+      var row = el('div','stage');
+      row.style.animationDelay = (i*80)+'ms';
+      row.innerHTML =
+        '<div class="mark '+cls+'">'+mk+'</div>' +
+        '<div class="sname">'+esc(s.name)+'</div>' +
+        '<div class="sdetail">'+esc(s.detail||'')+'</div>' +
+        '<div class="sms">'+((s.ms||s.ms===0) ? (s.ms+' ms') : '')+'</div>';
+      stages.appendChild(row);
+    });
+    out.appendChild(stages);
+
+    if(d.halted){
+      var w = el('div','card mt');
+      w.appendChild(el('div','note warn','Kill switch is ON in Airtable. No scraping, no AI calls, no writes. Total run time ' + secs + 's.'));
+      out.appendChild(w);
+      return;
+    }
+
+    var s = d.summary || {};
+    var tiles = el('div','tiles');
+    [[num(s.scanned),'Profiles scanned'],[num(s.newCreators),'New creators'],
+     [num(s.duplicatesBlocked),'Duplicates blocked'],
+     [(s.avgScore===null||s.avgScore===undefined)?'—':s.avgScore,'Avg fit score']].forEach(function(t){
+      var c = el('div','card tile');
+      c.appendChild(el('div','tval', esc(t[0])));
+      c.appendChild(el('div','tlab', esc(t[1])));
+      tiles.appendChild(c);
+    });
+    out.appendChild(tiles);
+
+    var cs = d.creators || [];
+    if(!cs.length){
+      var n = el('div','card mt');
+      n.appendChild(el('div','note','No new creators this run — everything found was already in the database, or nothing cleared the follower threshold.'));
+      out.appendChild(n);
+      return;
+    }
+    var grid = el('div','grid');
+    cs.forEach(function(c){
+      var v = (c.score===null||c.score===undefined) ? null : Number(c.score);
+      var col = v===null ? 'var(--dim)' : scoreColor(v);
+      var card = el('div','card cr');
+      card.innerHTML =
+        '<div class="crtop"><div><div class="handle">@'+esc(c.handle)+'</div>' +
+        '<div class="fol">'+num(c.followers)+' followers</div></div>' +
+        '<div class="score" style="color:'+col+'">'+(v===null?'—':v)+'</div></div>' +
+        '<div class="bar"><i style="width:'+(v===null?0:v)+'%;background:'+col+'"></i></div>' +
+        '<div class="why">'+esc(c.reasoning||'No reasoning returned.')+'</div>' +
+        '<div class="crlinks">' +
+          (c.profileUrl ? '<a class="crlink" href="'+esc(c.profileUrl)+'" target="_blank" rel="noopener">Profile ↗</a>' : '') +
+          (c.contact ? '<a class="crlink mail" href="mailto:'+esc(c.contact)+'">✉ '+esc(c.contact)+'</a>' : '') +
+        '</div>';
+      grid.appendChild(card);
+    });
+    out.appendChild(grid);
+  }
+
+  var rows = document.getElementById('rows');
+
+  SECTIONS.forEach(function(sec){
+    var row = el('div','row');
+
+    var task = el('div','task');
+    task.appendChild(el('div','tlabel', esc(sec.label) + ':'));
+    task.appendChild(el('div','tbody', esc(sec.task)));
+    row.appendChild(task);
+
+    var sol = el('div','sol');
+
+    if(sec.kind === 'discovery'){
+      buildDiscovery(sol);
+    } else if(sec.kind === 'static'){
+      var inv = el('div','card');
+      var box = el('div','inv');
+      INVENTORY.forEach(function(p){
+        box.appendChild(el('div','invrow','<span>'+esc(p[0])+'</span><span>'+esc(p[1])+'</span>'));
+      });
+      inv.appendChild(box);
+      sol.appendChild(inv);
+    } else {
+      var bar = el('div');
+      bar.style.display = 'flex';
+      bar.style.alignItems = 'center';
+      var b = el('button', null, esc(sec.btn));
+      var st = el('span','status');
+      bar.appendChild(b);
+      var cb = null;
+      if(sec.clear){
+        cb = el('button', 'ghost', esc(sec.clear.btn));
+        cb.style.marginLeft = '10px';
+        bar.appendChild(cb);
+      }
+      bar.appendChild(st);
+      sol.appendChild(bar);
+
+      var out = el('div','mt');
+      sol.appendChild(out);
+      if(cb) wireAction(sec.clear, cb, st, out);
+
+      if(sec.id === 'reliability'){
+        var hint = el('div','briefnote');
+        hint.style.padding = '12px 0 0';
+        hint.innerHTML = '<b>Also reachable from Telegram:</b> message the bot “kill the workflow” and every automation halts at its first step.';
+        sol.appendChild(hint);
+      }
+
+      wireAction(sec, b, st, out);
+    }
+
+    row.appendChild(sol);
+    rows.appendChild(row);
+  });
+})();
+</script>
+</body>
+</html>
