@@ -1,0 +1,236 @@
+{
+  "updatedAt": "2026-09-22T22:15:54.887Z",
+  "createdAt": "2026-09-22T15:53:41.253Z",
+  "id": "NoIFp3SQVlVMm3D1",
+  "name": "Creator Program - Reliability Controls",
+  "description": "Flips the Airtable KILL_SWITCH from the demo page. The Telegram command route lives in the jarvis - telegram ai bot workflow.",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "e70d0946-5e03-47ca-a6da-99ab282415c4",
+      "name": "Receive Kill Switch Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -300,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "program/killswitch",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "webhookId": "dccc5563-70b0-43f7-b855-d636a0fa53dd"
+    },
+    {
+      "id": "ddd52abf-6bee-4574-8f4e-169efa3876b2",
+      "name": "Read Current State",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -100,
+        0
+      ],
+      "parameters": {
+        "resource": "record",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appWB9HEm79syOpyO",
+          "cachedResultName": "Creator Discovery"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblCLR2VWBM9yCPJT",
+          "cachedResultName": "Settings"
+        },
+        "filterByFormula": "{Key} = \"KILL_SWITCH\"",
+        "returnAll": true,
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ocOykYREl6DCYw72",
+          "name": "elevenlabs-demo"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "id": "60e3b31d-2bc5-4553-81ac-7680bb146217",
+      "name": "Decide New State",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        100,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const req = $(\"Receive Kill Switch Request\").first().json.body || {};\nconst rows = $input.all().map(function (i) { return i.json || {}; });\nlet rec = null;\nrows.forEach(function (r) {\n  const f = r.fields || r;\n  if (String(f.Key || \"\") === \"KILL_SWITCH\") { rec = r; }\n});\nif (!rec && rows.length && rows[0].id) { rec = rows[0]; }\nconst cur = rec ? ((rec.Enabled === true) || (rec.fields && rec.fields.Enabled === true)) : false;\nlet next = cur;\nif (req.enabled === true || req.enabled === false) { next = req.enabled; } else { next = !cur; }\nconst recId = rec && rec.id ? rec.id : \"\";\nconst patchBody = { records: [{ id: recId, fields: { Enabled: next } }] };\nconst meta = [];\nmeta.push({ k: \"Previous state\", v: cur ? \"HALTED\" : \"RUNNING\" });\nmeta.push({ k: \"New state\", v: next ? \"HALTED\" : \"RUNNING\" });\nmeta.push({ k: \"Stored in\", v: \"Airtable Settings\" });\nmeta.push({ k: \"Record\", v: recId || \"not found\" });\nconst head = next ? \"Kill switch ON - every workflow will refuse to run\" : \"Kill switch OFF - workflows are live again\";\nconst out = { ok: true, action: \"killswitch\", enabled: next, recordId: recId, patchBody: patchBody, headline: head, detail: \"A checkbox a non-technical teammate can flip. Every workflow reads it as its first step and exits before spending money or writing data.\", meta: meta };\nreturn [{ json: out }];"
+      }
+    },
+    {
+      "id": "c3ad1eda-c83b-4833-a911-50601727b40c",
+      "name": "Flip The Switch",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        300,
+        -96
+      ],
+      "parameters": {
+        "method": "PATCH",
+        "url": "https://api.airtable.com/v0/appWB9HEm79syOpyO/tblCLR2VWBM9yCPJT",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.patchBody) }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ocOykYREl6DCYw72",
+          "name": "elevenlabs-demo"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 1000
+    },
+    {
+      "id": "c5f5c9da-7abf-43a6-ab32-fc9f5f97c9f2",
+      "name": "Respond Kill Switch",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        300,
+        80
+      ],
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {}
+      }
+    },
+    {
+      "id": "43cd8fe8-9141-4fb7-a618-98e420c2a244",
+      "name": "Notify Switch On Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        520,
+        -96
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "1688690425",
+        "text": "={{ $('Decide New State').first().json.enabled ? '🔴🔴🔴 KILL SWITCH ON 🔴🔴🔴\\nWorkflows HALTED (flipped from the demo page)\\n\\nEvery creator marketing workflow will now exit at its first step. No scraping, no AI calls, no writes.' : '🟢🟢🟢 KILL SWITCH OFF 🟢🟢🟢\\nWorkflows RUNNING (flipped from the demo page)\\n\\nCreator marketing workflows are live again.' }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "kOtQXJDJnxBOh3Y9",
+          "name": "Jarvis"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 1000,
+      "webhookId": "7bfb081c-deff-4138-888e-810e2d5a5a38"
+    }
+  ],
+  "connections": {
+    "Receive Kill Switch Request": {
+      "main": [
+        [
+          {
+            "node": "Read Current State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Current State": {
+      "main": [
+        [
+          {
+            "node": "Decide New State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decide New State": {
+      "main": [
+        [
+          {
+            "node": "Flip The Switch",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Respond Kill Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flip The Switch": {
+      "main": [
+        [
+          {
+            "node": "Notify Switch On Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "nodeGroups": [],
+  "pinData": null,
+  "versionId": "ab25b2bd-4ccc-409f-bea8-bd990a548902",
+  "activeVersionId": "ab25b2bd-4ccc-409f-bea8-bd990a548902",
+  "versionCounter": 4,
+  "triggerCount": 1,
+  "sourceWorkflowId": null,
+  "tags": [
+    {
+      "updatedAt": "2026-09-22T16:35:47.049Z",
+      "createdAt": "2026-09-22T16:35:47.049Z",
+      "id": "YM5RcHvASry6DCoo",
+      "name": "elevenlabs-demo"
+    }
+  ],
+  "versionMetadata": {
+    "name": "Red/green markers in switch notice",
+    "description": "Updated nodes: Notify Switch On Telegram"
+  }
+}

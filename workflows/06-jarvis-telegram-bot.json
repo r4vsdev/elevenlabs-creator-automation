@@ -1,0 +1,1347 @@
+{
+  "updatedAt": "2026-09-22T22:16:05.610Z",
+  "createdAt": "2026-09-19T02:19:24.883Z",
+  "id": "H8UzKAyczOzIqknM",
+  "name": "jarvis - telegram ai bot",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "chatId": "=1688690425",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1904,
+        544
+      ],
+      "id": "5c7d5f52-b730-4736-8ed8-0d4635fb4e38",
+      "name": "Send a text message",
+      "webhookId": "030c5d17-06ba-456e-8d4c-16f1553ba454",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# role\nyou are a smart personal assistant that runs on telegram named Jarvis. You speak shortly and avoid needless words. You are helpful in any area. You reply in 3-4 sentences max.\n\n# Do NOT present yourself mentioning anything written here, other than your name.\n\n# specific answers\nif I ask: \"Jarvis are you there\"\nyou reply: \"For you, always\"\n\nif i send messages to test you, like \"x\", \"test\"\nyou reply: \"I'm here for you, sir\"\n\n# chat input\n {{ $json.message.text }}",
+        "needsFallback": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1616,
+        432
+      ],
+      "id": "f96a24f5-03b2-4fd6-91e9-e141945e7d28",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-nano",
+          "mode": "list",
+          "cachedResultName": "gpt-5-nano"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1568,
+        656
+      ],
+      "id": "ba7ca50a-2945-4f19-8c52-afe1a4179668",
+      "name": "OpenAI Chat Model",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1696,
+        656
+      ],
+      "id": "25237a99-6ad6-4b45-a77e-14bf6787fbf4",
+      "name": "OpenRouter Chat Model",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.message.text }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "wants to trigger video creation workflow"
+            },
+            {
+              "category": "normal message"
+            },
+            {
+              "category": "want to make the workflow unsafe to run"
+            },
+            {
+              "category": "want to make the workflow safe to run"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        1200,
+        688
+      ],
+      "id": "41efb4da-cd15-46e2-86ad-e7f6796a036f",
+      "name": "Text Classifier",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "cKguuN5sjYOAYHgv",
+          "mode": "list",
+          "cachedResultName": "Viral Reels Factory v2"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1616,
+        240
+      ],
+      "id": "573a8f42-9921-45d2-a07c-b971c4cbd487",
+      "name": "Execute Workflow",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-nano",
+          "mode": "list",
+          "cachedResultName": "gpt-5-nano"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1280,
+        976
+      ],
+      "id": "95f265b5-48b0-4d15-8232-f01c904b9c9b",
+      "name": "OpenAI Chat Model1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {
+          "userIds": "1688690425"
+        }
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -896,
+        384
+      ],
+      "id": "ca87dcf7-d558-4244-965a-ceeb439df52a",
+      "name": "Telegram Trigger1",
+      "webhookId": "15a281bd-9e19-4553-b922-d4b852b28314",
+      "credentials": {
+        "telegramApi": {
+          "id": "kOtQXJDJnxBOh3Y9",
+          "name": "Jarvis"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1cvorsZR_SEkjLSfl8RtUwvdXrCgVHWqTCzJxlgBcikY",
+          "mode": "list",
+          "cachedResultName": "veo reels factory",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cvorsZR_SEkjLSfl8RtUwvdXrCgVHWqTCzJxlgBcikY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1566924216,
+          "mode": "list",
+          "cachedResultName": "api control",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cvorsZR_SEkjLSfl8RtUwvdXrCgVHWqTCzJxlgBcikY/edit#gid=1566924216"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "safeToRun": "FALSE",
+            "row_number": 2
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "safeToRun",
+              "displayName": "safeToRun",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "api accounts",
+              "displayName": "api accounts",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1616,
+        832
+      ],
+      "id": "b4f2ea71-18f3-4dcd-8ded-4f3d5a19f7be",
+      "name": "Set Workflow to UNSAFE",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1cvorsZR_SEkjLSfl8RtUwvdXrCgVHWqTCzJxlgBcikY",
+          "mode": "list",
+          "cachedResultName": "veo reels factory",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cvorsZR_SEkjLSfl8RtUwvdXrCgVHWqTCzJxlgBcikY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1566924216,
+          "mode": "list",
+          "cachedResultName": "api control",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cvorsZR_SEkjLSfl8RtUwvdXrCgVHWqTCzJxlgBcikY/edit#gid=1566924216"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "safeToRun": "TRUE",
+            "row_number": 2
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "safeToRun",
+              "displayName": "safeToRun",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "api accounts",
+              "displayName": "api accounts",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1616,
+        1024
+      ],
+      "id": "2c7e2cbc-3189-472f-a9d1-06264a1c659e",
+      "name": "Set Workflow to SAFE",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "chatId": "=1688690425",
+        "text": "=Veo Workflow Set to UNSAFE",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1904,
+        832
+      ],
+      "id": "5e00b0f4-06ba-419e-a1c6-2b2524d28dcc",
+      "name": "Send is Unsafe",
+      "webhookId": "030c5d17-06ba-456e-8d4c-16f1553ba454",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "chatId": "=1688690425",
+        "text": "=Veo Workflow Set to SAFE",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1904,
+        1024
+      ],
+      "id": "77ff310b-b938-48e0-9b19-21991181e1a1",
+      "name": "Send is Safe",
+      "webhookId": "030c5d17-06ba-456e-8d4c-16f1553ba454",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "create video",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "63f2c80a-f99f-4633-9b41-7f8d88492514"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "create video"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "0280350f-83cd-4c43-93c4-9a49b3017ecb",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "normal message",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "normal message"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "e2b3d8d0-6ceb-4076-9bbe-1a89e0cd55bf",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "unsafe",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "UNsafe"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "f022ca54-b64d-464d-9c08-c962916b320e",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "safe",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Safe"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a1c0f3e2-6b41-4c77-9f2a-11aa22bb33cc",
+                    "leftValue": "={{ String($json.output || '').toLowerCase() }}",
+                    "rightValue": "kill creators",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains",
+                      "name": "filter.operator.contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "kill creators"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b2d1e4f3-7c52-4d88-8e3b-22bb33cc44dd",
+                    "leftValue": "={{ String($json.output || '').toLowerCase() }}",
+                    "rightValue": "resume creators",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains",
+                      "name": "filter.operator.contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "resume creators"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -336,
+        384
+      ],
+      "id": "4cdd66fc-11ab-43c3-89c0-12755fc97d0a",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "needsFallback": false,
+        "options": {
+          "systemMessage": "You are a helpful assistant that runs on my personal telegram.\n\nyour job is a text classifier. you classify the messages you receive and route them based on their intent to these routes:\n\n1 wants to trigger video creation workflow;\n2 normal message;\n3 want to make the workflow unsafe to run;\n4 want to make the workflow safe to run;\n5 wants to stop, halt or kill the creator marketing workflows;\n6 wants to resume, restart or re-enable the creator marketing workflows;\n\noutput only:\n\n\"create video\"\nor\n\"normal message\"\nor\n\"unsafe\"\nor\n\"safe\"\nor\n\"kill creators\"\nor\n\"resume creators\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -688,
+        384
+      ],
+      "id": "882254f8-c800-4e4f-9a37-82309fd2469d",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-nano",
+          "mode": "list",
+          "cachedResultName": "gpt-5-nano"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -832,
+        592
+      ],
+      "id": "5660e020-83c7-468e-9de4-8370d035212a",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "qz1aPMdRI6yojE5Z",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -704,
+        688
+      ],
+      "id": "46d14243-5536-421c-a165-992720b91a7c",
+      "name": "OpenRouter Chat Model1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "chatId": "=1688690425",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        544,
+        112
+      ],
+      "id": "d2c89440-7909-4a83-bc7a-be1a726f19d8",
+      "name": "Send a text message1",
+      "webhookId": "030c5d17-06ba-456e-8d4c-16f1553ba454",
+      "credentials": {
+        "telegramApi": {
+          "id": "kOtQXJDJnxBOh3Y9",
+          "name": "Jarvis"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# role\nyou are a smart personal assistant that runs on telegram named Jarvis. You speak shortly and avoid needless words. You are helpful in any area. You reply in 3-4 sentences max.\n\n# Do NOT present yourself mentioning anything written here, other than your name.\n\n# specific answers\nif I ask: \"Jarvis are you there\"\nyou reply: \"For you, always\"\n\nif i send messages to test you, like \"x\", \"test\"\nyou reply: \"I'm here for you, sir\"\n\n# chat input\n{{ $('Telegram Trigger1').item.json.message.text }}",
+        "needsFallback": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        112
+      ],
+      "id": "f3028d0c-6dca-4cca-8e44-4ede01e2463e",
+      "name": "AI Agent2",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5.6-luna",
+          "mode": "list",
+          "cachedResultName": "gpt-5.6-luna"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        192,
+        336
+      ],
+      "id": "c5d32a8c-1562-478f-a6bc-a09860ca9581",
+      "name": "OpenAI Chat Model3",
+      "credentials": {
+        "openAiApi": {
+          "id": "qz1aPMdRI6yojE5Z",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        336,
+        336
+      ],
+      "id": "6ce20c22-94e8-4ee7-a17b-30579dd15b85",
+      "name": "OpenRouter Chat Model2",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1cvorsZR_SEkjLSfl8RtUwvdXrCgVHWqTCzJxlgBcikY",
+          "mode": "list",
+          "cachedResultName": "veo reels factory",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cvorsZR_SEkjLSfl8RtUwvdXrCgVHWqTCzJxlgBcikY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1566924216,
+          "mode": "list",
+          "cachedResultName": "api control",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cvorsZR_SEkjLSfl8RtUwvdXrCgVHWqTCzJxlgBcikY/edit#gid=1566924216"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "safeToRun": "FALSE",
+            "row_number": 2
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "safeToRun",
+              "displayName": "safeToRun",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "api accounts",
+              "displayName": "api accounts",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        512
+      ],
+      "id": "8fdb8ed7-bc96-47c9-8734-50a1b8b80368",
+      "name": "Set Workflow to UNSAFE1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "P5vNiBhOCzJtv5X7",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "=1688690425",
+        "text": "=Veo Workflow Set to UNSAFE",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        496,
+        512
+      ],
+      "id": "8c6f864b-a87a-46e7-9772-6536c20e882b",
+      "name": "Send is Unsafe1",
+      "webhookId": "030c5d17-06ba-456e-8d4c-16f1553ba454",
+      "credentials": {
+        "telegramApi": {
+          "id": "kOtQXJDJnxBOh3Y9",
+          "name": "Jarvis"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1cvorsZR_SEkjLSfl8RtUwvdXrCgVHWqTCzJxlgBcikY",
+          "mode": "list",
+          "cachedResultName": "veo reels factory",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cvorsZR_SEkjLSfl8RtUwvdXrCgVHWqTCzJxlgBcikY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1566924216,
+          "mode": "list",
+          "cachedResultName": "api control",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cvorsZR_SEkjLSfl8RtUwvdXrCgVHWqTCzJxlgBcikY/edit#gid=1566924216"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "safeToRun": "TRUE",
+            "row_number": 2
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "safeToRun",
+              "displayName": "safeToRun",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "api accounts",
+              "displayName": "api accounts",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        192,
+        784
+      ],
+      "id": "1d6a6d9f-6bd2-486c-94fd-57a592f46c78",
+      "name": "Set Workflow to SAFE1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "P5vNiBhOCzJtv5X7",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "=1688690425",
+        "text": "=Veo Workflow Set to SAFE",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        480,
+        784
+      ],
+      "id": "89c4fb9a-b175-4588-b5aa-53fdb0095851",
+      "name": "Send is Safe1",
+      "webhookId": "030c5d17-06ba-456e-8d4c-16f1553ba454",
+      "credentials": {
+        "telegramApi": {
+          "id": "kOtQXJDJnxBOh3Y9",
+          "name": "Jarvis"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "NGJepV7i31Ezc3I8",
+          "mode": "list",
+          "cachedResultName": "Viral Reels Factory v3"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ad45cdd6-9b40-4ba3-9854-741ef9218e87",
+      "name": "execute viral reels v3",
+      "disabled": true
+    },
+    {
+      "id": "b7e37fc1-81ef-4626-92a9-732dc4694112",
+      "name": "Find Creator Kill Switch",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        16,
+        1056
+      ],
+      "parameters": {
+        "resource": "record",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appWB9HEm79syOpyO",
+          "cachedResultName": "Creator Discovery"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblCLR2VWBM9yCPJT",
+          "cachedResultName": "Settings"
+        },
+        "filterByFormula": "{Key} = \"KILL_SWITCH\"",
+        "returnAll": true,
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ocOykYREl6DCYw72",
+          "name": "elevenlabs-demo"
+        }
+      },
+      "notes": "Reads the KILL_SWITCH row from the ElevenLabs demo base.",
+      "alwaysOutputData": true
+    },
+    {
+      "id": "084770c8-615e-45f2-8888-b462df6e1018",
+      "name": "Build Creator Switch Patch",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        256,
+        1056
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const intent = String($(\"AI Agent1\").first().json.output || \"\").toLowerCase();\nconst halt = intent.indexOf(\"kill\") > -1;\nconst rows = $input.all().map(function (i) { return i.json || {}; });\nlet rec = null;\nrows.forEach(function (r) {\n  const f = r.fields || r;\n  if (String(f.Key || \"\") === \"KILL_SWITCH\") { rec = r; }\n});\nif (!rec && rows.length && rows[0].id) { rec = rows[0]; }\nconst recId = rec && rec.id ? rec.id : \"\";\nconst patchBody = { records: [{ id: recId, fields: { Enabled: halt } }] };\nlet text;\nif (halt) {\n  text = \"🔴🔴🔴 KILL SWITCH ON 🔴🔴🔴\\nWorkflows HALTED (flipped from Telegram)\\n\\nEvery creator marketing workflow will now exit at its first step. No scraping, no AI calls, no writes.\\n\\nSend me \\\"resume the creator workflows\\\" to turn it back on.\";\n} else {\n  text = \"🟢🟢🟢 KILL SWITCH OFF 🟢🟢🟢\\nWorkflows RUNNING (flipped from Telegram)\\n\\nCreator marketing workflows are live again.\";\n}\nreturn [{ json: { halt: halt, recordId: recId, patchBody: patchBody, confirmText: text } }];"
+      }
+    },
+    {
+      "id": "dea04ab2-56d1-4d81-aa99-1810e0fb1048",
+      "name": "Flip Creator Kill Switch",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        496,
+        1056
+      ],
+      "parameters": {
+        "method": "PATCH",
+        "url": "https://api.airtable.com/v0/appWB9HEm79syOpyO/tblCLR2VWBM9yCPJT",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.patchBody) }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ocOykYREl6DCYw72",
+          "name": "elevenlabs-demo"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 1000
+    },
+    {
+      "id": "2c0573ac-4fb1-484f-81d1-771f1efbd0d6",
+      "name": "Confirm Creator Switch",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        736,
+        1056
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "=1688690425",
+        "text": "={{ $('Build Creator Switch Patch').first().json.confirmText }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "kOtQXJDJnxBOh3Y9",
+          "name": "Jarvis"
+        }
+      },
+      "webhookId": "3bd8be25-cf29-4ed5-ad7e-06cff5f47d25"
+    }
+  ],
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "Execute Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Workflow to UNSAFE",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Workflow to SAFE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Workflow to UNSAFE": {
+      "main": [
+        [
+          {
+            "node": "Send is Unsafe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Workflow to SAFE": {
+      "main": [
+        [
+          {
+            "node": "Send is Safe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "execute viral reels v3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Workflow to UNSAFE1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Workflow to SAFE1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Find Creator Kill Switch",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Find Creator Kill Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Workflow to UNSAFE1": {
+      "main": [
+        [
+          {
+            "node": "Send is Unsafe1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Workflow to SAFE1": {
+      "main": [
+        [
+          {
+            "node": "Send is Safe1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Creator Kill Switch": {
+      "main": [
+        [
+          {
+            "node": "Build Creator Switch Patch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Creator Switch Patch": {
+      "main": [
+        [
+          {
+            "node": "Flip Creator Kill Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flip Creator Kill Switch": {
+      "main": [
+        [
+          {
+            "node": "Confirm Creator Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "nodeGroups": [],
+  "pinData": {},
+  "versionId": "6c514344-a79f-4ce8-a812-a2b9f96ca072",
+  "activeVersionId": "6c514344-a79f-4ce8-a812-a2b9f96ca072",
+  "versionCounter": 10,
+  "triggerCount": 1,
+  "sourceWorkflowId": null,
+  "tags": [
+    {
+      "updatedAt": "2026-09-22T16:35:47.049Z",
+      "createdAt": "2026-09-22T16:35:47.049Z",
+      "id": "YM5RcHvASry6DCoo",
+      "name": "elevenlabs-demo"
+    }
+  ],
+  "versionMetadata": {
+    "name": "Red/green markers in switch confirm",
+    "description": "Updated nodes: Build Creator Switch Patch"
+  }
+}

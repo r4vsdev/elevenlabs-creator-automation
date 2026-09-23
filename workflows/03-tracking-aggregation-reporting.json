@@ -1,0 +1,1035 @@
+{
+  "updatedAt": "2026-09-22T20:42:45.736Z",
+  "createdAt": "2026-09-22T15:50:50.632Z",
+  "id": "lbtju5u8RYPJsbT3",
+  "name": "Creator Program - Tracking, Aggregation, Reporting",
+  "description": "Three webhook lanes: log new creator posts with live links into Airtable Metrics, roll every logged post into campaign totals and a per-creator breakdown, and write a weekly performance spreadsheet into a new Google Sheet.",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "316e9f8e-9cdc-4c58-b2eb-b7bdcec2cc1a",
+      "name": "POST Content Tracking",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -300,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "program/tracking",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "webhookId": "ff720ade-0213-4432-b10b-6d35a81a921c"
+    },
+    {
+      "id": "6e2a507d-3700-4753-a828-98d4313360aa",
+      "name": "Load Tracked Creators",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -100,
+        0
+      ],
+      "parameters": {
+        "resource": "record",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appWB9HEm79syOpyO",
+          "cachedResultName": "Creator Discovery"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblB7h8SohZ9JMPTz",
+          "cachedResultName": "Creators"
+        },
+        "returnAll": false,
+        "limit": 3,
+        "sort": {
+          "property": [
+            {
+              "field": "Fit Score",
+              "direction": "desc"
+            }
+          ]
+        },
+        "options": {
+          "fields": [
+            "Handle",
+            "Fit Score"
+          ]
+        }
+      },
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ocOykYREl6DCYw72",
+          "name": "elevenlabs-demo"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "id": "134a22d0-17e1-4036-9378-b0d35ce6a898",
+      "name": "Pick Tracked Creators",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        100,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const rows = $input.all().map(function (i) { return i.json; });\nconst handles = [];\nrows.forEach(function (r) {\n  const h = r.Handle || (r.fields && r.fields.Handle);\n  if (h && handles.length < 3) { handles.push(String(h).replace(/^@/, \"\").trim()); }\n});\nif (!handles.length) { handles.push(\"kapwing\"); }\nconst apifyBody = { profiles: handles, resultsPerPage: 5, shouldDownloadVideos: false, shouldDownloadCovers: false, shouldDownloadSubtitles: false, shouldDownloadSlideshowImages: false, shouldDownloadAvatars: false, proxyCountryCode: \"None\" };\nreturn [{ json: { t0: Date.now(), handles: handles, handleCount: handles.length, apifyBody: apifyBody } }];"
+      }
+    },
+    {
+      "id": "9128c47a-a966-4206-960e-0d3629af9836",
+      "name": "Scrape Recent Posts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        300,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/clockworks~tiktok-scraper/run-sync-get-dataset-items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.apifyBody) }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "iIfBQbSePHuliRNo",
+          "name": "apify amf6 main email"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000
+    },
+    {
+      "id": "88cf704e-ed2d-4d6c-8ee0-5b81d76a0ff3",
+      "name": "Normalize Posts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        500,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const prev = $(\"Pick Tracked Creators\").first().json;\nconst items = $input.all().map(function (i) { return i.json; });\nconst posts = [];\nitems.forEach(function (it) {\n  const a = it.authorMeta || it.author || {};\n  const handle = String(a.name || a.uniqueId || \"\").replace(/^@/, \"\").trim();\n  const id = String(it.id || it.awemeId || it.videoId || \"\").trim();\n  if (!id) { return; }\n  const url = it.webVideoUrl || it.videoUrl || (handle ? (\"https://www.tiktok.com/@\" + handle + \"/video/\" + id) : \"\");\n  const postedAt = it.createTimeISO || (it.createTime ? new Date(Number(it.createTime) * 1000).toISOString() : null);\n  posts.push({\n    postId: id,\n    handle: handle,\n    url: url,\n    postedAt: postedAt,\n    views: Number(it.playCount || 0) || 0,\n    likes: Number(it.diggCount || 0) || 0,\n    comments: Number(it.commentCount || 0) || 0,\n    shares: Number(it.shareCount || 0) || 0\n  });\n});\nreturn [{ json: { t0: prev.t0, tScrape: Date.now(), handles: prev.handles, handleCount: prev.handleCount, rawCount: items.length, posts: posts, postCount: posts.length } }];"
+      }
+    },
+    {
+      "id": "76e42491-711e-4959-8ff1-7df598759a8e",
+      "name": "Load Logged Posts",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        700,
+        0
+      ],
+      "parameters": {
+        "resource": "record",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appWB9HEm79syOpyO",
+          "cachedResultName": "Creator Discovery"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tbl5N9XgkarwFtSW8",
+          "cachedResultName": "Metrics"
+        },
+        "returnAll": true,
+        "options": {
+          "fields": [
+            "Post ID"
+          ]
+        }
+      },
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ocOykYREl6DCYw72",
+          "name": "elevenlabs-demo"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "id": "a62cbe8e-f007-41c4-8d40-d8300ae45d93",
+      "name": "Log New Posts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const prev = $(\"Normalize Posts\").first().json;\nconst seen = {};\n$input.all().forEach(function (i) {\n  const j = i.json || {};\n  const f = j.fields || {};\n  const id = j[\"Post ID\"] != null ? j[\"Post ID\"] : f[\"Post ID\"];\n  if (id) { seen[String(id).trim()] = true; }\n});\nconst fresh = prev.posts.filter(function (p) { return !seen[p.postId]; });\nconst already = prev.posts.length - fresh.length;\nfresh.sort(function (a, b) { return (b.views || 0) - (a.views || 0); });\nconst cols = [\"Creator\", \"Posted\", \"Views\", \"Likes\", \"Comments\", \"Link\"];\nconst trows = fresh.slice(0, 8).map(function (p) {\n  const d = p.postedAt ? String(p.postedAt).slice(0, 10) : \"-\";\n  return [\"@\" + p.handle, d, Number(p.views).toLocaleString(\"en-US\"), Number(p.likes).toLocaleString(\"en-US\"), Number(p.comments).toLocaleString(\"en-US\"), p.url];\n});\nconst meta = [];\nmeta.push({ k: \"Creators checked\", v: String(prev.handleCount) });\nmeta.push({ k: \"Posts seen\", v: String(prev.postCount) });\nmeta.push({ k: \"New posts logged\", v: String(fresh.length) });\nmeta.push({ k: \"Already tracked\", v: String(already) });\nconst out = { ok: true, action: \"tracking\", headline: fresh.length + \" new posts logged with live links\", detail: \"Checks each tracked creator, captures the post URL and publish date, and skips anything already logged.\", meta: meta, table: { columns: cols, rows: trows }, newPosts: fresh, newCount: fresh.length, alreadyTracked: already, handles: prev.handles };\nreturn [{ json: out }];"
+      }
+    },
+    {
+      "id": "41d2ab48-82ff-4eb1-9949-bd4507eee26b",
+      "name": "Split Posts For Airtable",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        -120
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const d = $(\"Log New Posts\").first().json;\nconst rows = d.newPosts || [];\nconst now = new Date().toISOString();\nreturn rows.map(function (p) {\n  const r = {};\n  r[\"Post ID\"] = p.postId;\n  r.Handle = p.handle;\n  r[\"Post URL\"] = p.url;\n  if (p.postedAt) { r[\"Posted At\"] = p.postedAt; }\n  r.Views = p.views;\n  r.Likes = p.likes;\n  r.Comments = p.comments;\n  r.Shares = p.shares;\n  r[\"Captured At\"] = now;\n  return { json: r };\n});"
+      }
+    },
+    {
+      "id": "9feccaf0-1534-4b40-acde-4dc5d46e0614",
+      "name": "Save Metrics To Airtable",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1300,
+        -120
+      ],
+      "parameters": {
+        "resource": "record",
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appWB9HEm79syOpyO",
+          "cachedResultName": "Creator Discovery"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tbl5N9XgkarwFtSW8",
+          "cachedResultName": "Metrics"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": null,
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ocOykYREl6DCYw72",
+          "name": "elevenlabs-demo"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 1000
+    },
+    {
+      "id": "b5deec05-9821-4c72-bf90-e590b72db016",
+      "name": "Respond Tracking",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1100,
+        80
+      ],
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {}
+      }
+    },
+    {
+      "id": "6554de37-b950-4e46-8a9a-14198bf28f62",
+      "name": "POST Aggregation",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -300,
+        360
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "program/aggregate",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "webhookId": "8097dece-ab49-4f2d-9d26-a5e3cdb13503"
+    },
+    {
+      "id": "12073e08-b26a-454e-b86e-2da4a6a27832",
+      "name": "Load All Metrics",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -100,
+        360
+      ],
+      "parameters": {
+        "resource": "record",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appWB9HEm79syOpyO",
+          "cachedResultName": "Creator Discovery"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tbl5N9XgkarwFtSW8",
+          "cachedResultName": "Metrics"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ocOykYREl6DCYw72",
+          "name": "elevenlabs-demo"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "id": "3112b436-b7a8-40ec-9f6e-d57d1bcaec0c",
+      "name": "Aggregate Performance",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        100,
+        360
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const rows = $input.all().map(function (i) { return i.json && i.json.fields ? i.json.fields : (i.json || {}); });\nlet views = 0, likes = 0, comments = 0, shares = 0;\nconst byCreator = {};\nrows.forEach(function (r) {\n  const h = String(r.Handle || \"unknown\");\n  const v = Number(r.Views || 0) || 0;\n  const l = Number(r.Likes || 0) || 0;\n  const c = Number(r.Comments || 0) || 0;\n  const s = Number(r.Shares || 0) || 0;\n  views += v; likes += l; comments += c; shares += s;\n  if (!byCreator[h]) { byCreator[h] = { handle: h, posts: 0, views: 0, likes: 0, comments: 0, shares: 0 }; }\n  byCreator[h].posts += 1;\n  byCreator[h].views += v;\n  byCreator[h].likes += l;\n  byCreator[h].comments += c;\n  byCreator[h].shares += s;\n});\nconst list = Object.keys(byCreator).map(function (k) { return byCreator[k]; });\nlist.sort(function (a, b) { return b.views - a.views; });\nconst engagements = likes + comments + shares;\nconst rate = views ? (engagements / views * 100) : 0;\nconst fmt = function (n) { return Number(n).toLocaleString(\"en-US\"); };\nconst cols = [\"Creator\", \"Posts\", \"Views\", \"Likes\", \"Comments\", \"Eng. rate\"];\nconst trows = list.map(function (c) {\n  const er = c.views ? ((c.likes + c.comments + c.shares) / c.views * 100) : 0;\n  return [\"@\" + c.handle, String(c.posts), fmt(c.views), fmt(c.likes), fmt(c.comments), er.toFixed(1) + \"%\"];\n});\nconst meta = [];\nmeta.push({ k: \"Posts\", v: fmt(rows.length) });\nmeta.push({ k: \"Views\", v: fmt(views) });\nmeta.push({ k: \"Engagements\", v: fmt(engagements) });\nmeta.push({ k: \"Eng. rate\", v: rate.toFixed(2) + \"%\" });\nconst out = { ok: true, action: \"aggregation\", headline: fmt(views) + \" views across \" + rows.length + \" tracked posts\", detail: \"Every logged post rolled up into campaign totals and a per-creator breakdown. No manual data entry.\", meta: meta, table: { columns: cols, rows: trows }, totals: { posts: rows.length, views: views, likes: likes, comments: comments, shares: shares, engagements: engagements, engagementRate: Number(rate.toFixed(2)) }, perCreator: list };\nreturn [{ json: out }];"
+      }
+    },
+    {
+      "id": "7617084e-9a01-4be6-8e72-48748616ad98",
+      "name": "Respond Aggregation",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        300,
+        360
+      ],
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {}
+      }
+    },
+    {
+      "id": "3e9a01d8-fe05-421b-a6d7-bb7025f38e06",
+      "name": "POST Report",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -300,
+        640
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "program/report",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "webhookId": "95f833bc-aff1-4196-b37a-e4c9117f1a57"
+    },
+    {
+      "id": "2111d8c8-4a58-4df6-bb6d-b160da5400d2",
+      "name": "Load Metrics For Report",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -100,
+        640
+      ],
+      "parameters": {
+        "resource": "record",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appWB9HEm79syOpyO",
+          "cachedResultName": "Creator Discovery"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tbl5N9XgkarwFtSW8",
+          "cachedResultName": "Metrics"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ocOykYREl6DCYw72",
+          "name": "elevenlabs-demo"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "id": "72ad335f-5056-4cf0-beff-876b30874a46",
+      "name": "Build Report Rows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        100,
+        640
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const rows = $input.all().map(function (i) { return i.json && i.json.fields ? i.json.fields : (i.json || {}); });\nconst byCreator = {};\nlet views = 0, likes = 0, comments = 0, shares = 0;\nrows.forEach(function (r) {\n  const h = String(r.Handle || \"unknown\");\n  const v = Number(r.Views || 0) || 0;\n  const l = Number(r.Likes || 0) || 0;\n  const c = Number(r.Comments || 0) || 0;\n  const s = Number(r.Shares || 0) || 0;\n  views += v; likes += l; comments += c; shares += s;\n  if (!byCreator[h]) { byCreator[h] = { handle: h, posts: 0, views: 0, likes: 0, comments: 0, shares: 0 }; }\n  byCreator[h].posts += 1;\n  byCreator[h].views += v;\n  byCreator[h].likes += l;\n  byCreator[h].comments += c;\n  byCreator[h].shares += s;\n});\nconst list = Object.keys(byCreator).map(function (k) { return byCreator[k]; });\nlist.sort(function (a, b) { return b.views - a.views; });\nconst stamp = new Date().toISOString().slice(0, 10);\nconst title = \"ElevenLabs creator performance - week of \" + stamp;\nconst values = [];\nvalues.push([\"ElevenLabs creator program - weekly performance\"]);\nvalues.push([\"Generated\", new Date().toISOString().slice(0, 16).replace(\"T\", \" \") + \" UTC\"]);\nvalues.push([]);\nvalues.push([\"Campaign totals\"]);\nvalues.push([\"Posts tracked\", rows.length]);\nvalues.push([\"Views\", views]);\nvalues.push([\"Likes\", likes]);\nvalues.push([\"Comments\", comments]);\nvalues.push([\"Shares\", shares]);\nvalues.push([\"Engagement rate\", views ? Number(((likes + comments + shares) / views * 100).toFixed(2)) : 0]);\nvalues.push([]);\nvalues.push([\"Creator\", \"Posts\", \"Views\", \"Likes\", \"Comments\", \"Shares\", \"Engagement rate %\"]);\nlist.forEach(function (c) {\n  const er = c.views ? Number(((c.likes + c.comments + c.shares) / c.views * 100).toFixed(2)) : 0;\n  values.push([\"@\" + c.handle, c.posts, c.views, c.likes, c.comments, c.shares, er]);\n});\nreturn [{ json: { title: title, values: values, rowCount: rows.length, creatorCount: list.length, views: views, likes: likes, comments: comments, shares: shares, createBody: { properties: { title: title }, sheets: [{ properties: { title: \"Weekly\" } }] } } }];"
+      }
+    },
+    {
+      "id": "f31d4bb0-d890-45f1-b51f-5af7e0e4f493",
+      "name": "Create Spreadsheet",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        300,
+        640
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.createBody) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "P5vNiBhOCzJtv5X7",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "id": "6d2a8626-5b04-4d5a-a285-ce25e8a30a0f",
+      "name": "Write Report Values",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        500,
+        640
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $json.spreadsheetId }}/values/Weekly!A1:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: $(\"Build Report Rows\").first().json.values }) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "P5vNiBhOCzJtv5X7",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "id": "b15f88b1-38dc-4478-a665-2fdad507029d",
+      "name": "Build Report Panel",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        640
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const built = $(\"Build Report Rows\").first().json;\nconst sheet = $(\"Create Spreadsheet\").first().json;\nconst url = sheet.spreadsheetUrl || \"\";\nconst fmt = function (n) { return Number(n).toLocaleString(\"en-US\"); };\nconst meta = [];\nmeta.push({ k: \"Rows written\", v: String(built.values.length) });\nmeta.push({ k: \"Creators\", v: String(built.creatorCount) });\nmeta.push({ k: \"Posts\", v: String(built.rowCount) });\nmeta.push({ k: \"Views\", v: fmt(built.views) });\nconst out = { ok: true, action: \"report\", headline: \"Weekly performance spreadsheet created\", detail: \"Totals and a per-creator breakdown written straight into a new Google Sheet. Same job runs monthly on a schedule.\", meta: meta, link: { label: \"Open the spreadsheet\", url: url }, title: built.title };\nreturn [{ json: out }];"
+      }
+    },
+    {
+      "id": "35ed3ec9-5fa3-44f5-80aa-1b43005da4b6",
+      "name": "Respond Report",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        900,
+        640
+      ],
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {}
+      }
+    },
+    {
+      "id": "8306e11c-8cbc-414e-9923-0a07cc58d4cc",
+      "name": "POST CRM Sync",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -300,
+        900
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "program/crm",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "webhookId": "2e87b0e8-6ae2-4a59-bb6b-16a6f5012d13"
+    },
+    {
+      "id": "44ca602e-10ac-4d81-9678-3a313bebcac7",
+      "name": "Load CRM Records",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -100,
+        900
+      ],
+      "parameters": {
+        "resource": "record",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appWB9HEm79syOpyO",
+          "cachedResultName": "Creator Discovery"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblB7h8SohZ9JMPTz",
+          "cachedResultName": "Creators"
+        },
+        "returnAll": true,
+        "sort": {
+          "property": [
+            {
+              "field": "Fit Score",
+              "direction": "desc"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ocOykYREl6DCYw72",
+          "name": "elevenlabs-demo"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "id": "1a1ee79a-80a1-4888-9188-071142fd6fbb",
+      "name": "Build CRM Panel",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        100,
+        900
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const rows = $input.all().map(function (i) { return i.json && i.json.fields ? i.json.fields : (i.json || {}); }).filter(function (r) { return r.Handle; });\nconst fmt = function (n) { return Number(n || 0).toLocaleString(\"en-US\"); };\nconst withContact = rows.filter(function (r) { return r.Contact; }).length;\nconst scored = rows.filter(function (r) { return r[\"Fit Score\"] != null; });\nconst avg = scored.length ? Math.round(scored.reduce(function (t, r) { return t + Number(r[\"Fit Score\"]); }, 0) / scored.length) : null;\nconst cols = [\"Creator\", \"Followers\", \"Fit score\", \"Contact\", \"Added\"];\nconst trows = rows.slice(0, 12).map(function (r) {\n  const d = r[\"Discovered At\"] ? String(r[\"Discovered At\"]).slice(0, 10) : \"-\";\n  return [\"@\" + r.Handle, fmt(r.Followers), r[\"Fit Score\"] != null ? String(r[\"Fit Score\"]) : \"-\", r.Contact || \"-\", d];\n});\nconst meta = [];\nmeta.push({ k: \"Profiles in CRM\", v: String(rows.length) });\nmeta.push({ k: \"With contact email\", v: String(withContact) });\nmeta.push({ k: \"Average fit score\", v: avg === null ? \"-\" : String(avg) });\nmeta.push({ k: \"Database\", v: \"Airtable\" });\nconst out = { ok: true, action: \"crm\", headline: rows.length + \" profiles synced into the team database\", detail: \"Every discovered creator is written straight to the CRM with handle, reach, fit score, the reasoning behind it and a contact email pulled from the bio.\", meta: meta, table: { columns: cols, rows: trows } };\nreturn [{ json: out }];"
+      }
+    },
+    {
+      "id": "eae2fc6c-a2ce-48f8-9fb9-bf77b0312429",
+      "name": "Respond CRM",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        300,
+        900
+      ],
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {}
+      }
+    },
+    {
+      "id": "e8c8256e-fb15-4c79-8c24-20ac36f8e6b1",
+      "name": "POST Clear CRM",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -300,
+        1160
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "program/crm-clear",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "webhookId": "369a4627-e198-4897-bb73-f7efdc90b8de"
+    },
+    {
+      "id": "11844197-bac7-4527-babb-9c7e33903d62",
+      "name": "List Creators To Clear",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -100,
+        1160
+      ],
+      "parameters": {
+        "resource": "record",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "appWB9HEm79syOpyO"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblB7h8SohZ9JMPTz"
+        },
+        "returnAll": true,
+        "options": {
+          "fields": [
+            "Handle"
+          ]
+        }
+      },
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ocOykYREl6DCYw72",
+          "name": "elevenlabs-demo"
+        }
+      }
+    },
+    {
+      "id": "13783e9a-1ab5-43a7-ba42-2cd09de883ad",
+      "name": "Batch Record IDs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        100,
+        1160
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const ids = $input.all().map(function (i) { return i.json && i.json.id; }).filter(function (id) { return id && String(id).indexOf(\"rec\") === 0; });\nconst out = [];\nfor (let i = 0; i < ids.length; i += 10) {\n  const chunk = ids.slice(i, i + 10);\n  out.push({ json: { qs: chunk.map(function (id) { return \"records[]=\" + id; }).join(\"&\"), n: chunk.length } });\n}\nif (!out.length) { out.push({ json: { qs: \"\", n: 0, empty: true } }); }\nreturn out;"
+      }
+    },
+    {
+      "id": "25922616-8620-4b44-b054-88545ef7bbc8",
+      "name": "Delete Creator Batch",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        300,
+        1160
+      ],
+      "parameters": {
+        "method": "DELETE",
+        "url": "=https://api.airtable.com/v0/appWB9HEm79syOpyO/tblB7h8SohZ9JMPTz?{{ $json.qs }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "options": {}
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 1000,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ocOykYREl6DCYw72",
+          "name": "elevenlabs-demo"
+        }
+      }
+    },
+    {
+      "id": "9c7e4a45-7ef5-4853-b359-5bb811829c39",
+      "name": "Build Clear Panel",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        500,
+        1160
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "let removed = 0;\n$input.all().forEach(function (i) {\n  const r = (i.json && i.json.records) || [];\n  r.forEach(function (x) { if (x && x.deleted) { removed += 1; } });\n});\nconst meta = [];\nmeta.push({ k: \"Profiles removed\", v: String(removed) });\nmeta.push({ k: \"Profiles left\", v: \"0\" });\nconst out = { ok: true, action: \"crm-clear\", headline: removed ? (removed + \" profiles cleared from the CRM\") : \"CRM was already empty\", detail: \"Creators table wiped. Discovery now starts from a clean slate.\", meta: meta, removed: removed };\nreturn [{ json: out }];"
+      }
+    },
+    {
+      "id": "e166c455-d80e-46dd-b580-0ef79d88da67",
+      "name": "Respond Clear CRM",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        700,
+        1160
+      ],
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "POST Content Tracking": {
+      "main": [
+        [
+          {
+            "node": "Load Tracked Creators",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Tracked Creators": {
+      "main": [
+        [
+          {
+            "node": "Pick Tracked Creators",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick Tracked Creators": {
+      "main": [
+        [
+          {
+            "node": "Scrape Recent Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrape Recent Posts": {
+      "main": [
+        [
+          {
+            "node": "Normalize Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Posts": {
+      "main": [
+        [
+          {
+            "node": "Load Logged Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Logged Posts": {
+      "main": [
+        [
+          {
+            "node": "Log New Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log New Posts": {
+      "main": [
+        [
+          {
+            "node": "Split Posts For Airtable",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Respond Tracking",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Posts For Airtable": {
+      "main": [
+        [
+          {
+            "node": "Save Metrics To Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST Aggregation": {
+      "main": [
+        [
+          {
+            "node": "Load All Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load All Metrics": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Performance",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Performance": {
+      "main": [
+        [
+          {
+            "node": "Respond Aggregation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST Report": {
+      "main": [
+        [
+          {
+            "node": "Load Metrics For Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Metrics For Report": {
+      "main": [
+        [
+          {
+            "node": "Build Report Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Report Rows": {
+      "main": [
+        [
+          {
+            "node": "Create Spreadsheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Spreadsheet": {
+      "main": [
+        [
+          {
+            "node": "Write Report Values",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Report Values": {
+      "main": [
+        [
+          {
+            "node": "Build Report Panel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Report Panel": {
+      "main": [
+        [
+          {
+            "node": "Respond Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST CRM Sync": {
+      "main": [
+        [
+          {
+            "node": "Load CRM Records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load CRM Records": {
+      "main": [
+        [
+          {
+            "node": "Build CRM Panel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build CRM Panel": {
+      "main": [
+        [
+          {
+            "node": "Respond CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST Clear CRM": {
+      "main": [
+        [
+          {
+            "node": "List Creators To Clear",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Creators To Clear": {
+      "main": [
+        [
+          {
+            "node": "Batch Record IDs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch Record IDs": {
+      "main": [
+        [
+          {
+            "node": "Delete Creator Batch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Creator Batch": {
+      "main": [
+        [
+          {
+            "node": "Build Clear Panel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Clear Panel": {
+      "main": [
+        [
+          {
+            "node": "Respond Clear CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "nodeGroups": [],
+  "pinData": null,
+  "versionId": "8941caea-11b7-477a-95c1-f8bcba364fcf",
+  "activeVersionId": "8941caea-11b7-477a-95c1-f8bcba364fcf",
+  "versionCounter": 3,
+  "triggerCount": 5,
+  "sourceWorkflowId": null,
+  "tags": [
+    {
+      "updatedAt": "2026-09-22T16:35:47.049Z",
+      "createdAt": "2026-09-22T16:35:47.049Z",
+      "id": "YM5RcHvASry6DCoo",
+      "name": "elevenlabs-demo"
+    }
+  ],
+  "versionMetadata": {
+    "name": "Add clear-CRM lane",
+    "description": "Added nodes: POST Clear CRM, List Creators To Clear, Batch Record IDs, Delete Creator Batch, Build Clear Panel and 1 more\nConnections: 5 added, 0 removed"
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "updatedAt": "2026-09-22T16:36:13.863Z",
+  "createdAt": "2026-09-11T12:17:54.287Z",
+  "id": "uIMnegJRpl0KRsVh",
+  "name": "Creator Program - Error Alert",
+  "description": "Fires on any failure of the Creator Discovery workflow and sends a Telegram alert naming the failing node and error.",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "07e313ea-b07f-4290-ad4b-6cee38f1197b",
+      "name": "On Workflow Error",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "3c39ff14-8f6b-458d-90a3-9ed4cf5a3a82",
+      "name": "Send Failure Alert",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        520,
+        300
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "1688690425",
+        "text": "=FAILED: {{ $json.workflow.name }}\n\nStep that failed: {{ $json.execution.lastNodeExecuted || \"unknown\" }}\nError: {{ $json.execution.error.message || \"no message\" }}\nExecution ID: {{ $json.execution.id }}\nTime: {{ $now.toFormat(\"yyyy-LL-dd HH:mm:ss\") }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "kOtQXJDJnxBOh3Y9",
+          "name": "Jarvis"
+        }
+      },
+      "webhookId": "42727932-6fbb-4823-9885-6f2edd3b2f17"
+    }
+  ],
+  "connections": {
+    "On Workflow Error": {
+      "main": [
+        [
+          {
+            "node": "Send Failure Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "nodeGroups": [],
+  "pinData": null,
+  "versionId": "020eb558-c334-4c71-b3c6-b54365421fac",
+  "activeVersionId": "020eb558-c334-4c71-b3c6-b54365421fac",
+  "versionCounter": 2,
+  "triggerCount": 0,
+  "sourceWorkflowId": null,
+  "tags": [
+    {
+      "updatedAt": "2026-09-22T16:35:47.049Z",
+      "createdAt": "2026-09-22T16:35:47.049Z",
+      "id": "YM5RcHvASry6DCoo",
+      "name": "elevenlabs-demo"
+    }
+  ],
+  "versionMetadata": {
+    "name": "Set Telegram chat ID",
+    "description": "Replaces the placeholder chat ID with the real one so failure alerts actually deliver."
+  }
+}

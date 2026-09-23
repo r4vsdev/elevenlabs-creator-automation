@@ -1,0 +1,348 @@
+{
+  "updatedAt": "2026-09-22T16:37:28.684Z",
+  "createdAt": "2026-09-22T15:46:21.702Z",
+  "id": "TCHRsD8j6mjSqXLr",
+  "name": "Creator Program - Onboarding, Contracts, Reminders",
+  "description": "Three webhook-triggered lanes for the demo page: welcome packet on Telegram, contract merged from mock deal data and rendered to PDF then delivered on Telegram, and a posting-deadline reminder.",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "f49d2677-9765-4b21-99d6-ea5b2e609519",
+      "name": "POST Onboarding",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -240,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "program/onboarding",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "webhookId": "759cb231-0430-4ca1-93a3-4b2ec42c995c"
+    },
+    {
+      "id": "dc296b8b-cafa-400a-8f48-1824f23ef120",
+      "name": "Build Welcome Packet",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const body = $json.body || {};\nconst handle = String(body.handle || \"valentinloiseau.ai\").replace(/^@/, \"\").trim();\nconst campaign = String(body.campaign || \"#seedance\");\nconst L = [];\nL.push(\"WELCOME TO THE ELEVENLABS CREATOR PROGRAM\");\nL.push(\"\");\nL.push(\"Hi @\" + handle + \" - you are confirmed for \" + campaign + \".\");\nL.push(\"\");\nL.push(\"1. BRAND GUIDELINES\");\nL.push(\"Say ElevenLabs, never Eleven Labs. Logo on dark backgrounds only.\");\nL.push(\"Never imply a voice is a real persons without consent.\");\nL.push(\"\");\nL.push(\"2. BRIEF TEMPLATE\");\nL.push(\"Hook in the first 2 seconds. Show the product doing the work.\");\nL.push(\"One clear call to action. 15-45 seconds.\");\nL.push(\"\");\nL.push(\"3. DISCLOSURE\");\nL.push(\"Tag the post #ad and use the TikTok paid partnership label.\");\nL.push(\"\");\nL.push(\"4. WHAT HAPPENS NEXT\");\nL.push(\"Contract arrives within 24h. Draft due 7 days after signature.\");\nL.push(\"\");\nL.push(\"Questions: creators@elevenlabs.io\");\nlet text = \"\";\nL.forEach(function (l, i) { text += (i ? \"\\n\" : \"\") + l; });\nconst meta = [];\nmeta.push({ k: \"Creator\", v: \"@\" + handle });\nmeta.push({ k: \"Campaign\", v: campaign });\nmeta.push({ k: \"Channel\", v: \"Telegram\" });\nmeta.push({ k: \"Sections\", v: \"4\" });\nconst out = { ok: true, action: \"onboarding\", headline: \"Welcome packet sent to @\" + handle, detail: \"Brand guidelines, brief template, disclosure rules and next steps.\", meta: meta, body: text, telegramText: text };\nreturn [{ json: out }];"
+      }
+    },
+    {
+      "id": "e7928b5c-d02b-4e65-8a3e-62e9f481b4e5",
+      "name": "Send Packet On Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        -96
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "1688690425",
+        "text": "={{ $json.telegramText }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "kOtQXJDJnxBOh3Y9",
+          "name": "Jarvis"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "webhookId": "44b288aa-07c6-4684-8aa4-ab0d11c1901d"
+    },
+    {
+      "id": "97bbe904-ff50-4a18-88e3-1165a9b57f16",
+      "name": "Respond Onboarding",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        240,
+        80
+      ],
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {}
+      }
+    },
+    {
+      "id": "0975a64c-6207-4e03-9641-bc0582950e15",
+      "name": "POST Contract",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -240,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "program/contract",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "webhookId": "8ec87745-1b6c-4328-8313-8fe8758b091d"
+    },
+    {
+      "id": "0fb5d973-3987-4b3a-9f80-a9b03be0cd80",
+      "name": "Merge Template And Render PDF",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const body = $json.body || {};\nconst handle = String(body.handle || \"valentinloiseau.ai\").replace(/^@/, \"\").trim();\nconst followers = Number(body.followers || 1400000);\nconst rate = Math.max(250, Math.round(followers / 1000) * 12);\nconst today = new Date();\nconst dateLabel = today.toISOString().slice(0, 10);\nconst dueLabel = new Date(today.getTime() + 14 * 86400000).toISOString().slice(0, 10);\nfunction safe(s) {\n  var t = String(s);\n  var out = \"\";\n  for (var i = 0; i < t.length; i++) {\n    var c = t.charCodeAt(i);\n    if (c >= 32 && c <= 126 && c !== 40 && c !== 41 && c !== 92) { out += t.charAt(i); }\n  }\n  return out;\n}\nconst L = [];\nL.push(\"CREATOR PARTNERSHIP AGREEMENT\");\nL.push(\"\");\nL.push(\"Between: ElevenLabs Inc. - the Brand\");\nL.push(\"And: @\" + handle + \" - the Creator\");\nL.push(\"Agreement date: \" + dateLabel);\nL.push(\"\");\nL.push(\"1. CAMPAIGN\");\nL.push(\"Campaign: #seedance\");\nL.push(\"Audience size at signature: \" + followers.toLocaleString(\"en-US\") + \" followers\");\nL.push(\"\");\nL.push(\"2. DELIVERABLES\");\nL.push(\"Two TikTok videos, 15-45 seconds each\");\nL.push(\"One story frame with link sticker\");\nL.push(\"First draft due: \" + dueLabel);\nL.push(\"\");\nL.push(\"3. PAYOUT\");\nL.push(\"Fee: USD \" + rate.toLocaleString(\"en-US\"));\nL.push(\"Terms: net 30 from the date content is verified live\");\nL.push(\"Method: bank transfer to the account on file\");\nL.push(\"\");\nL.push(\"4. USAGE RIGHTS\");\nL.push(\"Paid social usage for 90 days from first post\");\nL.push(\"Organic usage on Brand channels in perpetuity\");\nL.push(\"\");\nL.push(\"5. EXCLUSIVITY\");\nL.push(\"No competing AI audio brand for 30 days from first post\");\nL.push(\"\");\nL.push(\"6. DISCLOSURE\");\nL.push(\"Creator will label posts as a paid partnership and include #ad\");\nL.push(\"\");\nL.push(\"\");\nL.push(\"Signed for the Brand                 Signed by the Creator\");\nL.push(\"\");\nL.push(\"_______________________              _______________________\");\nL.push(\"ElevenLabs Inc.                      @\" + handle);\nL.push(\"\");\nL.push(\"Document generated automatically. Mock terms for demonstration.\");\nlet content = \"BT\\n/F1 11 Tf\\n56 786 Td\\n15 TL\\n\";\nL.forEach(function (l) { content += \"(\" + safe(l) + \") Tj T*\\n\"; });\ncontent += \"ET\";\nconst objs = {};\nobjs[1] = \"<< /Type /Catalog /Pages 2 0 R >>\";\nobjs[2] = \"<< /Type /Pages /Kids [3 0 R] /Count 1 >>\";\nobjs[3] = \"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>\";\nobjs[4] = \"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\";\nobjs[5] = \"<< /Length \" + content.length + \" >>\\nstream\\n\" + content + \"\\nendstream\";\nlet pdf = \"%PDF-1.4\\n\";\nconst offsets = {};\nfor (let i = 1; i <= 5; i++) {\n  offsets[i] = pdf.length;\n  pdf += i + \" 0 obj\\n\" + objs[i] + \"\\nendobj\\n\";\n}\nconst xrefPos = pdf.length;\npdf += \"xref\\n0 6\\n0000000000 65535 f \\n\";\nfor (let i = 1; i <= 5; i++) {\n  let o = String(offsets[i]);\n  while (o.length < 10) { o = \"0\" + o; }\n  pdf += o + \" 00000 n \\n\";\n}\npdf += \"trailer\\n<< /Size 6 /Root 1 0 R >>\\nstartxref\\n\" + xrefPos + \"\\n%%EOF\";\nconst b64 = Buffer.from(pdf, \"latin1\").toString(\"base64\");\nconst fileName = \"elevenlabs-contract-\" + handle + \".pdf\";\nlet text = \"\";\nL.forEach(function (l, i) { text += (i ? \"\\n\" : \"\") + l; });\nconst meta = [];\nmeta.push({ k: \"Creator\", v: \"@\" + handle });\nmeta.push({ k: \"Fee\", v: \"USD \" + rate.toLocaleString(\"en-US\") });\nmeta.push({ k: \"Draft due\", v: dueLabel });\nmeta.push({ k: \"File\", v: fileName });\nconst out = { ok: true, action: \"contract\", headline: \"Contract generated for @\" + handle, detail: \"Names, dates and payout rates merged into the template, rendered to PDF and delivered. Ready to route for e-signature.\", meta: meta, body: text, fileName: fileName };\nreturn [{ json: out, binary: { data: { data: b64, mimeType: \"application/pdf\", fileName: fileName, fileExtension: \"pdf\" } } }];"
+      }
+    },
+    {
+      "id": "d5e0e9ab-cbde-4aa7-b2ac-cf8e0f8c7cac",
+      "name": "Deliver Contract PDF",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        204
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendDocument",
+        "chatId": "1688690425",
+        "binaryData": true,
+        "binaryPropertyName": "data",
+        "additionalFields": {
+          "caption": "={{ $json.headline }} - ready to route for e-signature."
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "kOtQXJDJnxBOh3Y9",
+          "name": "Jarvis"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "webhookId": "75cf3895-fa4b-46c1-8d98-685fdca53487"
+    },
+    {
+      "id": "79f1300f-aa50-4091-8acf-a121119e268a",
+      "name": "Respond Contract",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        240,
+        380
+      ],
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {}
+      }
+    },
+    {
+      "id": "c83ec448-2128-4023-9349-93ce8d64b8d2",
+      "name": "POST Reminder",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -240,
+        600
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "program/reminder",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "webhookId": "d6bd9764-4943-44db-90d9-99ebb1a8bbe2"
+    },
+    {
+      "id": "ee8cde75-027b-4869-9c71-4c5313f28463",
+      "name": "Build Deadline Reminder",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        600
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const body = $json.body || {};\nconst handle = String(body.handle || \"kapwing\").replace(/^@/, \"\").trim();\nconst hours = Number(body.hours || 48);\nconst due = new Date(Date.now() + hours * 3600 * 1000);\nconst dueLabel = due.toISOString().slice(0, 16).replace(\"T\", \" \") + \" UTC\";\nconst L = [];\nL.push(\"POSTING DEADLINE REMINDER\");\nL.push(\"\");\nL.push(\"@\" + handle + \" - your #seedance draft is due in \" + hours + \" hours.\");\nL.push(\"Deadline: \" + dueLabel);\nL.push(\"\");\nL.push(\"Before you post, check:\");\nL.push(\"- Paid partnership label is on\");\nL.push(\"- #ad is in the caption\");\nL.push(\"- Product is visible doing the work\");\nL.push(\"\");\nL.push(\"Reply here if you need an extension.\");\nlet text = \"\";\nL.forEach(function (l, i) { text += (i ? \"\\n\" : \"\") + l; });\nconst meta = [];\nmeta.push({ k: \"Creator\", v: \"@\" + handle });\nmeta.push({ k: \"Due in\", v: hours + \"h\" });\nmeta.push({ k: \"Deadline\", v: dueLabel });\nmeta.push({ k: \"Channel\", v: \"Telegram\" });\nconst out = { ok: true, action: \"reminder\", headline: \"Deadline reminder sent to @\" + handle, detail: \"Fires on a schedule before each creator deadline. Telegram here, Slack or email in production.\", meta: meta, body: text, telegramText: text };\nreturn [{ json: out }];"
+      }
+    },
+    {
+      "id": "15f919c0-f7a0-4947-b62e-b4a8f173d94e",
+      "name": "Send Reminder On Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        504
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "1688690425",
+        "text": "={{ $json.telegramText }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "kOtQXJDJnxBOh3Y9",
+          "name": "Jarvis"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "webhookId": "3fb0e1fb-b845-4c30-a753-297d3a9238a5"
+    },
+    {
+      "id": "e130dc03-2625-42a2-bf29-2983c0f89bce",
+      "name": "Respond Reminder",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        240,
+        680
+      ],
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "POST Onboarding": {
+      "main": [
+        [
+          {
+            "node": "Build Welcome Packet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Welcome Packet": {
+      "main": [
+        [
+          {
+            "node": "Send Packet On Telegram",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Respond Onboarding",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST Contract": {
+      "main": [
+        [
+          {
+            "node": "Merge Template And Render PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Template And Render PDF": {
+      "main": [
+        [
+          {
+            "node": "Deliver Contract PDF",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Respond Contract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST Reminder": {
+      "main": [
+        [
+          {
+            "node": "Build Deadline Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Deadline Reminder": {
+      "main": [
+        [
+          {
+            "node": "Send Reminder On Telegram",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Respond Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "nodeGroups": [],
+  "pinData": null,
+  "versionId": "8a549bdb-4098-4e73-a614-4ca715ba088c",
+  "activeVersionId": "8a549bdb-4098-4e73-a614-4ca715ba088c",
+  "versionCounter": 1,
+  "triggerCount": 3,
+  "sourceWorkflowId": null,
+  "tags": [
+    {
+      "updatedAt": "2026-09-22T16:35:47.049Z",
+      "createdAt": "2026-09-22T16:35:47.049Z",
+      "id": "YM5RcHvASry6DCoo",
+      "name": "elevenlabs-demo"
+    }
+  ],
+  "versionMetadata": {
+    "name": "Lifecycle actions: onboarding, contract PDF, reminders",
+    "description": "Created with 12 nodes: POST Onboarding, Build Welcome Packet, Send Packet On Telegram, Respond Onboarding, POST Contract and 7 more"
+  }
+}
