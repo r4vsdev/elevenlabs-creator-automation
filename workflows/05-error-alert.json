@@ -30,7 +30,7 @@
       "parameters": {
         "resource": "message",
         "operation": "sendMessage",
-        "chatId": "1688690425",
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
         "text": "=FAILED: {{ $json.workflow.name }}\n\nStep that failed: {{ $json.execution.lastNodeExecuted || \"unknown\" }}\nError: {{ $json.execution.error.message || \"no message\" }}\nExecution ID: {{ $json.execution.id }}\nTime: {{ $now.toFormat(\"yyyy-LL-dd HH:mm:ss\") }}",
         "additionalFields": {
           "appendAttribution": false

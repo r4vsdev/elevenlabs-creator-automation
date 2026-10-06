@@ -34,7 +34,7 @@ Exports carry credential **references** only, never secrets. After import, recon
 | Telegram bot | Every notification |
 | Google Sheets OAuth2 | Weekly report |
 
-Hardcoded in nodes: Airtable base `appWB9HEm79syOpyO`, Telegram chat ID `1688690425`.
+Hardcoded in nodes (set your own after import): Airtable base `appWB9HEm79syOpyO` and table ids, Telegram chat ID `YOUR_TELEGRAM_CHAT_ID`, and in `06` the Google Sheet `YOUR_GOOGLE_SHEET_ID`.
 
 ---
 

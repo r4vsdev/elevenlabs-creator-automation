@@ -398,7 +398,7 @@
     },
     {
       "parameters": {
-        "chatId": "1688690425",
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
         "text": "=Creator Discovery finished\n\nKeyword: {{ $json.keyword }}\nProfiles scanned: {{ $json.summary.scanned }}\nPassed follower filter: {{ $json.summary.passedFilter }}\nDuplicates blocked: {{ $json.summary.duplicatesBlocked }}\nNew creators saved: {{ $json.summary.newCreators }}\nAverage fit score: {{ $json.summary.avgScore }}",
         "additionalFields": {
           "appendAttribution": false

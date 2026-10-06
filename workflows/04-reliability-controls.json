@@ -135,7 +135,7 @@
       "parameters": {
         "resource": "message",
         "operation": "sendMessage",
-        "chatId": "1688690425",
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
         "text": "={{ $('Decide New State').first().json.enabled ? '🔴🔴🔴 KILL SWITCH ON 🔴🔴🔴\\nWorkflows HALTED (flipped from the demo page)\\n\\nEvery creator marketing workflow will now exit at its first step. No scraping, no AI calls, no writes.' : '🟢🟢🟢 KILL SWITCH OFF 🟢🟢🟢\\nWorkflows RUNNING (flipped from the demo page)\\n\\nCreator marketing workflows are live again.' }}",
         "additionalFields": {
           "appendAttribution": false

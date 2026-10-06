@@ -9,7 +9,7 @@
   "nodes": [
     {
       "parameters": {
-        "chatId": "=1688690425",
+        "chatId": "=YOUR_TELEGRAM_CHAT_ID",
         "text": "={{ $json.output }}",
         "additionalFields": {
           "appendAttribution": false
@@ -164,7 +164,7 @@
           "message"
         ],
         "additionalFields": {
-          "userIds": "1688690425"
+          "userIds": "YOUR_TELEGRAM_CHAT_ID"
         }
       },
       "type": "n8n-nodes-base.telegramTrigger",
@@ -188,17 +188,17 @@
         "operation": "update",
         "documentId": {
           "__rl": true,
-          "value": "1cvorsZR_SEkjLSfl8RtUwvdXrCgVHWqTCzJxlgBcikY",
+          "value": "YOUR_GOOGLE_SHEET_ID",
           "mode": "list",
           "cachedResultName": "veo reels factory",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cvorsZR_SEkjLSfl8RtUwvdXrCgVHWqTCzJxlgBcikY/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
           "value": 1566924216,
           "mode": "list",
           "cachedResultName": "api control",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cvorsZR_SEkjLSfl8RtUwvdXrCgVHWqTCzJxlgBcikY/edit#gid=1566924216"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=1566924216"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -272,17 +272,17 @@
         "operation": "update",
         "documentId": {
           "__rl": true,
-          "value": "1cvorsZR_SEkjLSfl8RtUwvdXrCgVHWqTCzJxlgBcikY",
+          "value": "YOUR_GOOGLE_SHEET_ID",
           "mode": "list",
           "cachedResultName": "veo reels factory",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cvorsZR_SEkjLSfl8RtUwvdXrCgVHWqTCzJxlgBcikY/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
           "value": 1566924216,
           "mode": "list",
           "cachedResultName": "api control",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cvorsZR_SEkjLSfl8RtUwvdXrCgVHWqTCzJxlgBcikY/edit#gid=1566924216"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=1566924216"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -353,7 +353,7 @@
     },
     {
       "parameters": {
-        "chatId": "=1688690425",
+        "chatId": "=YOUR_TELEGRAM_CHAT_ID",
         "text": "=Veo Workflow Set to UNSAFE",
         "additionalFields": {
           "appendAttribution": false
@@ -372,7 +372,7 @@
     },
     {
       "parameters": {
-        "chatId": "=1688690425",
+        "chatId": "=YOUR_TELEGRAM_CHAT_ID",
         "text": "=Veo Workflow Set to SAFE",
         "additionalFields": {
           "appendAttribution": false
@@ -615,7 +615,7 @@
     },
     {
       "parameters": {
-        "chatId": "=1688690425",
+        "chatId": "=YOUR_TELEGRAM_CHAT_ID",
         "text": "={{ $json.output }}",
         "additionalFields": {
           "appendAttribution": false
@@ -699,17 +699,17 @@
         "operation": "update",
         "documentId": {
           "__rl": true,
-          "value": "1cvorsZR_SEkjLSfl8RtUwvdXrCgVHWqTCzJxlgBcikY",
+          "value": "YOUR_GOOGLE_SHEET_ID",
           "mode": "list",
           "cachedResultName": "veo reels factory",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cvorsZR_SEkjLSfl8RtUwvdXrCgVHWqTCzJxlgBcikY/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
           "value": 1566924216,
           "mode": "list",
           "cachedResultName": "api control",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cvorsZR_SEkjLSfl8RtUwvdXrCgVHWqTCzJxlgBcikY/edit#gid=1566924216"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=1566924216"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -785,7 +785,7 @@
     },
     {
       "parameters": {
-        "chatId": "=1688690425",
+        "chatId": "=YOUR_TELEGRAM_CHAT_ID",
         "text": "=Veo Workflow Set to UNSAFE",
         "additionalFields": {
           "appendAttribution": false
@@ -812,17 +812,17 @@
         "operation": "update",
         "documentId": {
           "__rl": true,
-          "value": "1cvorsZR_SEkjLSfl8RtUwvdXrCgVHWqTCzJxlgBcikY",
+          "value": "YOUR_GOOGLE_SHEET_ID",
           "mode": "list",
           "cachedResultName": "veo reels factory",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cvorsZR_SEkjLSfl8RtUwvdXrCgVHWqTCzJxlgBcikY/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
           "value": 1566924216,
           "mode": "list",
           "cachedResultName": "api control",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cvorsZR_SEkjLSfl8RtUwvdXrCgVHWqTCzJxlgBcikY/edit#gid=1566924216"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=1566924216"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -898,7 +898,7 @@
     },
     {
       "parameters": {
-        "chatId": "=1688690425",
+        "chatId": "=YOUR_TELEGRAM_CHAT_ID",
         "text": "=Veo Workflow Set to SAFE",
         "additionalFields": {
           "appendAttribution": false
@@ -1044,7 +1044,7 @@
       "parameters": {
         "resource": "message",
         "operation": "sendMessage",
-        "chatId": "=1688690425",
+        "chatId": "=YOUR_TELEGRAM_CHAT_ID",
         "text": "={{ $('Build Creator Switch Patch').first().json.confirmText }}",
         "additionalFields": {
           "appendAttribution": false

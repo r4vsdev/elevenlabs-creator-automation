@@ -53,7 +53,7 @@
       "parameters": {
         "resource": "message",
         "operation": "sendMessage",
-        "chatId": "1688690425",
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
         "text": "={{ $json.telegramText }}",
         "additionalFields": {
           "appendAttribution": false
@@ -128,7 +128,7 @@
       "parameters": {
         "resource": "message",
         "operation": "sendDocument",
-        "chatId": "1688690425",
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
         "binaryData": true,
         "binaryPropertyName": "data",
         "additionalFields": {
@@ -204,7 +204,7 @@
       "parameters": {
         "resource": "message",
         "operation": "sendMessage",
-        "chatId": "1688690425",
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
         "text": "={{ $json.telegramText }}",
         "additionalFields": {
           "appendAttribution": false
