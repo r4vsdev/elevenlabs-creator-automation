@@ -13,7 +13,7 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -300,
+        -760,
         0
       ],
       "parameters": {
@@ -270,7 +270,7 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -300,
+        -760,
         360
       ],
       "parameters": {
@@ -353,7 +353,7 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -300,
+        -760,
         640
       ],
       "parameters": {
@@ -509,7 +509,7 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -300,
+        -760,
         900
       ],
       "parameters": {
@@ -600,7 +600,7 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -300,
+        -760,
         1160
       ],
       "parameters": {
@@ -720,6 +720,396 @@
         "respondWith": "firstIncomingItem",
         "options": {}
       }
+    },
+    {
+      "id": "0b6e9dae-56b4-4d10-8ea4-133172e22538",
+      "name": "Check Key (POST Content Tracking)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -530,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "rowExists",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1AKNFEl0rEW4A8HO",
+          "cachedResultName": "creator_demo_access"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "access_key",
+              "condition": "eq",
+              "keyValue": "={{ $json.headers['x-demo-key'] || '-' }}"
+            }
+          ]
+        }
+      },
+      "notes": "Passes the request through only if X-Demo-Key matches a row in creator_demo_access."
+    },
+    {
+      "id": "49038b3a-127d-446c-a717-d151bdcee401",
+      "name": "Wrong Key (POST Content Tracking)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -530,
+        140
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "rowNotExists",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1AKNFEl0rEW4A8HO",
+          "cachedResultName": "creator_demo_access"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "access_key",
+              "condition": "eq",
+              "keyValue": "={{ $json.headers['x-demo-key'] || '-' }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "edbb77d2-1729-4fe8-952a-810b9757f7df",
+      "name": "Respond 401 (POST Content Tracking)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -300,
+        140
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"error\":\"unauthorized\",\"message\":\"Missing or wrong X-Demo-Key.\"}",
+        "options": {
+          "responseCode": 401
+        }
+      }
+    },
+    {
+      "id": "4d90341c-8ecd-451c-857e-057e4192abec",
+      "name": "Check Key (POST Aggregation)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -530,
+        360
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "rowExists",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1AKNFEl0rEW4A8HO",
+          "cachedResultName": "creator_demo_access"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "access_key",
+              "condition": "eq",
+              "keyValue": "={{ $json.headers['x-demo-key'] || '-' }}"
+            }
+          ]
+        }
+      },
+      "notes": "Passes the request through only if X-Demo-Key matches a row in creator_demo_access."
+    },
+    {
+      "id": "3ce3014d-5885-4a1c-816b-cb0307f72b1e",
+      "name": "Wrong Key (POST Aggregation)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -530,
+        500
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "rowNotExists",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1AKNFEl0rEW4A8HO",
+          "cachedResultName": "creator_demo_access"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "access_key",
+              "condition": "eq",
+              "keyValue": "={{ $json.headers['x-demo-key'] || '-' }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "f042035e-7d5f-4b8f-9926-fe64c625138f",
+      "name": "Respond 401 (POST Aggregation)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -300,
+        500
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"error\":\"unauthorized\",\"message\":\"Missing or wrong X-Demo-Key.\"}",
+        "options": {
+          "responseCode": 401
+        }
+      }
+    },
+    {
+      "id": "5c6fbf4b-2a0b-4015-8821-d8766cbad86e",
+      "name": "Check Key (POST Report)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -530,
+        640
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "rowExists",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1AKNFEl0rEW4A8HO",
+          "cachedResultName": "creator_demo_access"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "access_key",
+              "condition": "eq",
+              "keyValue": "={{ $json.headers['x-demo-key'] || '-' }}"
+            }
+          ]
+        }
+      },
+      "notes": "Passes the request through only if X-Demo-Key matches a row in creator_demo_access."
+    },
+    {
+      "id": "2489ce73-92f2-45ec-b2a1-a4b212921140",
+      "name": "Wrong Key (POST Report)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -530,
+        780
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "rowNotExists",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1AKNFEl0rEW4A8HO",
+          "cachedResultName": "creator_demo_access"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "access_key",
+              "condition": "eq",
+              "keyValue": "={{ $json.headers['x-demo-key'] || '-' }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "2d841924-eba8-4408-bd9f-cc44c3bf4fec",
+      "name": "Respond 401 (POST Report)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -300,
+        780
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"error\":\"unauthorized\",\"message\":\"Missing or wrong X-Demo-Key.\"}",
+        "options": {
+          "responseCode": 401
+        }
+      }
+    },
+    {
+      "id": "41e0b427-39d2-4855-ad19-5f3344b92ad1",
+      "name": "Check Key (POST CRM Sync)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -530,
+        900
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "rowExists",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1AKNFEl0rEW4A8HO",
+          "cachedResultName": "creator_demo_access"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "access_key",
+              "condition": "eq",
+              "keyValue": "={{ $json.headers['x-demo-key'] || '-' }}"
+            }
+          ]
+        }
+      },
+      "notes": "Passes the request through only if X-Demo-Key matches a row in creator_demo_access."
+    },
+    {
+      "id": "d34b772b-ec9b-4034-a965-48b4abf30a7a",
+      "name": "Wrong Key (POST CRM Sync)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -530,
+        1040
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "rowNotExists",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1AKNFEl0rEW4A8HO",
+          "cachedResultName": "creator_demo_access"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "access_key",
+              "condition": "eq",
+              "keyValue": "={{ $json.headers['x-demo-key'] || '-' }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "3b7e6cf9-c08f-484e-8f4e-9db6ce88dbe5",
+      "name": "Respond 401 (POST CRM Sync)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -300,
+        1040
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"error\":\"unauthorized\",\"message\":\"Missing or wrong X-Demo-Key.\"}",
+        "options": {
+          "responseCode": 401
+        }
+      }
+    },
+    {
+      "id": "79390ff5-54ed-49a8-bbf9-25ac9ea5a93a",
+      "name": "Check Key (POST Clear CRM)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -530,
+        1160
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "rowExists",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1AKNFEl0rEW4A8HO",
+          "cachedResultName": "creator_demo_access"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "access_key",
+              "condition": "eq",
+              "keyValue": "={{ $json.headers['x-demo-key'] || '-' }}"
+            }
+          ]
+        }
+      },
+      "notes": "Passes the request through only if X-Demo-Key matches a row in creator_demo_access."
+    },
+    {
+      "id": "4a3b9c56-7ef2-467d-aa3d-88447297064a",
+      "name": "Wrong Key (POST Clear CRM)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -530,
+        1300
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "rowNotExists",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1AKNFEl0rEW4A8HO",
+          "cachedResultName": "creator_demo_access"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "access_key",
+              "condition": "eq",
+              "keyValue": "={{ $json.headers['x-demo-key'] || '-' }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ac3a9c14-1d2b-4857-b773-c0f0943cdab4",
+      "name": "Respond 401 (POST Clear CRM)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -300,
+        1300
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"error\":\"unauthorized\",\"message\":\"Missing or wrong X-Demo-Key.\"}",
+        "options": {
+          "responseCode": 401
+        }
+      }
     }
   ],
   "connections": {
@@ -727,7 +1117,12 @@
       "main": [
         [
           {
-            "node": "Load Tracked Creators",
+            "node": "Check Key (POST Content Tracking)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wrong Key (POST Content Tracking)",
             "type": "main",
             "index": 0
           }
@@ -820,7 +1215,12 @@
       "main": [
         [
           {
-            "node": "Load All Metrics",
+            "node": "Check Key (POST Aggregation)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wrong Key (POST Aggregation)",
             "type": "main",
             "index": 0
           }
@@ -853,7 +1253,12 @@
       "main": [
         [
           {
-            "node": "Load Metrics For Report",
+            "node": "Check Key (POST Report)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wrong Key (POST Report)",
             "type": "main",
             "index": 0
           }
@@ -919,7 +1324,12 @@
       "main": [
         [
           {
-            "node": "Load CRM Records",
+            "node": "Check Key (POST CRM Sync)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wrong Key (POST CRM Sync)",
             "type": "main",
             "index": 0
           }
@@ -952,7 +1362,12 @@
       "main": [
         [
           {
-            "node": "List Creators To Clear",
+            "node": "Check Key (POST Clear CRM)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wrong Key (POST Clear CRM)",
             "type": "main",
             "index": 0
           }
@@ -997,6 +1412,116 @@
         [
           {
             "node": "Respond Clear CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Key (POST Content Tracking)": {
+      "main": [
+        [
+          {
+            "node": "Load Tracked Creators",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wrong Key (POST Content Tracking)": {
+      "main": [
+        [
+          {
+            "node": "Respond 401 (POST Content Tracking)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Key (POST Aggregation)": {
+      "main": [
+        [
+          {
+            "node": "Load All Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wrong Key (POST Aggregation)": {
+      "main": [
+        [
+          {
+            "node": "Respond 401 (POST Aggregation)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Key (POST Report)": {
+      "main": [
+        [
+          {
+            "node": "Load Metrics For Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wrong Key (POST Report)": {
+      "main": [
+        [
+          {
+            "node": "Respond 401 (POST Report)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Key (POST CRM Sync)": {
+      "main": [
+        [
+          {
+            "node": "Load CRM Records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wrong Key (POST CRM Sync)": {
+      "main": [
+        [
+          {
+            "node": "Respond 401 (POST CRM Sync)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Key (POST Clear CRM)": {
+      "main": [
+        [
+          {
+            "node": "List Creators To Clear",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wrong Key (POST Clear CRM)": {
+      "main": [
+        [
+          {
+            "node": "Respond 401 (POST Clear CRM)",
             "type": "main",
             "index": 0
           }

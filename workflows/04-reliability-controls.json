@@ -13,7 +13,7 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -300,
+        -760,
         0
       ],
       "parameters": {
@@ -152,6 +152,84 @@
       "maxTries": 2,
       "waitBetweenTries": 1000,
       "webhookId": "7bfb081c-deff-4138-888e-810e2d5a5a38"
+    },
+    {
+      "id": "589bbba7-180f-4841-b7df-8af4b2c2b477",
+      "name": "Check Key (Receive Kill Switch Request)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -530,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "rowExists",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1AKNFEl0rEW4A8HO",
+          "cachedResultName": "creator_demo_access"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "access_key",
+              "condition": "eq",
+              "keyValue": "={{ $json.headers['x-demo-key'] || '-' }}"
+            }
+          ]
+        }
+      },
+      "notes": "Passes the request through only if X-Demo-Key matches a row in creator_demo_access."
+    },
+    {
+      "id": "af2786e0-6bce-4f5d-93c0-84c8d23b812b",
+      "name": "Wrong Key (Receive Kill Switch Request)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -530,
+        140
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "rowNotExists",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1AKNFEl0rEW4A8HO",
+          "cachedResultName": "creator_demo_access"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "access_key",
+              "condition": "eq",
+              "keyValue": "={{ $json.headers['x-demo-key'] || '-' }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "f53f4e92-7672-4db4-8c92-98c46bdb5e14",
+      "name": "Respond 401 (Receive Kill Switch Request)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -300,
+        140
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"error\":\"unauthorized\",\"message\":\"Missing or wrong X-Demo-Key.\"}",
+        "options": {
+          "responseCode": 401
+        }
+      }
     }
   ],
   "connections": {
@@ -159,7 +237,12 @@
       "main": [
         [
           {
-            "node": "Read Current State",
+            "node": "Check Key (Receive Kill Switch Request)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wrong Key (Receive Kill Switch Request)",
             "type": "main",
             "index": 0
           }
@@ -198,6 +281,28 @@
         [
           {
             "node": "Notify Switch On Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Key (Receive Kill Switch Request)": {
+      "main": [
+        [
+          {
+            "node": "Read Current State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wrong Key (Receive Kill Switch Request)": {
+      "main": [
+        [
+          {
+            "node": "Respond 401 (Receive Kill Switch Request)",
             "type": "main",
             "index": 0
           }

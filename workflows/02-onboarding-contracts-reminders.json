@@ -13,7 +13,7 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -240,
+        -700,
         0
       ],
       "parameters": {
@@ -88,7 +88,7 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -240,
+        -700,
         300
       ],
       "parameters": {
@@ -164,7 +164,7 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -240,
+        -700,
         600
       ],
       "parameters": {
@@ -232,6 +232,240 @@
         "respondWith": "firstIncomingItem",
         "options": {}
       }
+    },
+    {
+      "id": "0da3e6cd-6993-416e-aff1-55274674e367",
+      "name": "Check Key (POST Onboarding)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -470,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "rowExists",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1AKNFEl0rEW4A8HO",
+          "cachedResultName": "creator_demo_access"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "access_key",
+              "condition": "eq",
+              "keyValue": "={{ $json.headers['x-demo-key'] || '-' }}"
+            }
+          ]
+        }
+      },
+      "notes": "Passes the request through only if X-Demo-Key matches a row in creator_demo_access."
+    },
+    {
+      "id": "7c63f5ce-30ed-4cdb-8496-f503b76ef67c",
+      "name": "Wrong Key (POST Onboarding)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -470,
+        140
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "rowNotExists",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1AKNFEl0rEW4A8HO",
+          "cachedResultName": "creator_demo_access"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "access_key",
+              "condition": "eq",
+              "keyValue": "={{ $json.headers['x-demo-key'] || '-' }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "2c496ba0-93c5-4b7a-b6c6-4eab86b09235",
+      "name": "Respond 401 (POST Onboarding)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -240,
+        140
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"error\":\"unauthorized\",\"message\":\"Missing or wrong X-Demo-Key.\"}",
+        "options": {
+          "responseCode": 401
+        }
+      }
+    },
+    {
+      "id": "f1602832-0758-46d3-804b-f2301a560684",
+      "name": "Check Key (POST Contract)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -470,
+        300
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "rowExists",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1AKNFEl0rEW4A8HO",
+          "cachedResultName": "creator_demo_access"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "access_key",
+              "condition": "eq",
+              "keyValue": "={{ $json.headers['x-demo-key'] || '-' }}"
+            }
+          ]
+        }
+      },
+      "notes": "Passes the request through only if X-Demo-Key matches a row in creator_demo_access."
+    },
+    {
+      "id": "9b903a9f-c19f-4f45-b063-f523a859ee10",
+      "name": "Wrong Key (POST Contract)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -470,
+        440
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "rowNotExists",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1AKNFEl0rEW4A8HO",
+          "cachedResultName": "creator_demo_access"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "access_key",
+              "condition": "eq",
+              "keyValue": "={{ $json.headers['x-demo-key'] || '-' }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "fc6eed41-5030-4c24-9484-cf1f20ff7552",
+      "name": "Respond 401 (POST Contract)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -240,
+        440
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"error\":\"unauthorized\",\"message\":\"Missing or wrong X-Demo-Key.\"}",
+        "options": {
+          "responseCode": 401
+        }
+      }
+    },
+    {
+      "id": "c918164d-71e4-4748-bee2-e9246e573858",
+      "name": "Check Key (POST Reminder)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -470,
+        600
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "rowExists",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1AKNFEl0rEW4A8HO",
+          "cachedResultName": "creator_demo_access"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "access_key",
+              "condition": "eq",
+              "keyValue": "={{ $json.headers['x-demo-key'] || '-' }}"
+            }
+          ]
+        }
+      },
+      "notes": "Passes the request through only if X-Demo-Key matches a row in creator_demo_access."
+    },
+    {
+      "id": "bfa6058d-0dd6-4c7b-bd66-9a66acb4a2d4",
+      "name": "Wrong Key (POST Reminder)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -470,
+        740
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "rowNotExists",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1AKNFEl0rEW4A8HO",
+          "cachedResultName": "creator_demo_access"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "access_key",
+              "condition": "eq",
+              "keyValue": "={{ $json.headers['x-demo-key'] || '-' }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "3fa14f7d-23f3-431a-b9f4-bde92af358b1",
+      "name": "Respond 401 (POST Reminder)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -240,
+        740
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"error\":\"unauthorized\",\"message\":\"Missing or wrong X-Demo-Key.\"}",
+        "options": {
+          "responseCode": 401
+        }
+      }
     }
   ],
   "connections": {
@@ -239,7 +473,12 @@
       "main": [
         [
           {
-            "node": "Build Welcome Packet",
+            "node": "Check Key (POST Onboarding)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wrong Key (POST Onboarding)",
             "type": "main",
             "index": 0
           }
@@ -266,7 +505,12 @@
       "main": [
         [
           {
-            "node": "Merge Template And Render PDF",
+            "node": "Check Key (POST Contract)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wrong Key (POST Contract)",
             "type": "main",
             "index": 0
           }
@@ -293,7 +537,12 @@
       "main": [
         [
           {
-            "node": "Build Deadline Reminder",
+            "node": "Check Key (POST Reminder)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wrong Key (POST Reminder)",
             "type": "main",
             "index": 0
           }
@@ -310,6 +559,72 @@
           },
           {
             "node": "Respond Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Key (POST Onboarding)": {
+      "main": [
+        [
+          {
+            "node": "Build Welcome Packet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wrong Key (POST Onboarding)": {
+      "main": [
+        [
+          {
+            "node": "Respond 401 (POST Onboarding)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Key (POST Contract)": {
+      "main": [
+        [
+          {
+            "node": "Merge Template And Render PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wrong Key (POST Contract)": {
+      "main": [
+        [
+          {
+            "node": "Respond 401 (POST Contract)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Key (POST Reminder)": {
+      "main": [
+        [
+          {
+            "node": "Build Deadline Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wrong Key (POST Reminder)": {
+      "main": [
+        [
+          {
+            "node": "Respond 401 (POST Reminder)",
             "type": "main",
             "index": 0
           }

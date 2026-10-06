@@ -54,6 +54,19 @@ Hardcoded in nodes (set your own after import): Airtable base `appWB9HEm79syOpyO
 | `POST /webhook/program/report` | Build a new Google Sheet | ~5s |
 | `POST /webhook/program/killswitch` | Flip the Airtable checkbox → Telegram notice | ~2s |
 
+### Access key
+
+The page is public; every `POST` route is not. Each one checks an `X-Demo-Key` header against the
+n8n Data Table `creator_demo_access` (column `access_key`) and returns `401` on a missing or wrong key.
+The key never appears in the page, the workflow JSON, or this repo.
+
+- **Share the demo** as `https://n8n.aiblackops.xyz/webhook/creator-discovery#key=<access_key>`. The part
+  after `#` never reaches the server. The page keeps it for the tab and removes it from the address bar.
+  Without it, the page asks for the key.
+- **Issue or revoke** a key by adding or deleting a row in `creator_demo_access`. No redeploy.
+- **After importing** these workflows, create that Data Table and point the `Check Key` / `Wrong Key`
+  nodes at it.
+
 ---
 
 ## Airtable — base `appWB9HEm79syOpyO`

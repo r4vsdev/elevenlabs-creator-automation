@@ -60,6 +60,9 @@
   .ghost:hover{color:var(--fg); border-color:#3a3a42}
 
   .card{background:var(--panel); border:1px solid var(--line); border-radius:13px}
+  .keybar{display:none; gap:10px; align-items:center; flex-wrap:wrap; margin-top:18px; padding:12px 14px;
+    background:var(--panel); border:1px solid var(--line); border-radius:13px; color:var(--muted); font-size:13.5px}
+  .keybar.show{display:flex} .keybar input{flex:1; min-width:180px}
   .note{padding:16px 18px; color:var(--muted); font-size:13.5px}
   .note.bad{color:var(--bad)} .note.warn{color:var(--warn)}
   .hide{display:none}
@@ -172,6 +175,11 @@
     <h1 class="brand">II<span>ElevenLabs</span></h1>
     <div class="lede">Everything this role asks for is on the left.
       <b>On the right, a button that actually does it.</b></div>
+    <form class="keybar" id="keybar">
+      <span>The buttons need an access key. Open the link you were sent, or paste the key here.</span>
+      <input id="keyinput" type="password" placeholder="Access key" autocomplete="off" spellcheck="false">
+      <button type="submit">Save key</button>
+    </form>
   </header>
 
   <div class="colhead"><div>The task</div><div>The automation</div></div>
@@ -182,6 +190,30 @@
 <script>
 (function(){
   var ORIGIN = window.location.protocol.indexOf('http') === 0 ? window.location.origin : 'https://n8n.aiblackops.xyz';
+
+  // Every action webhook requires an X-Demo-Key header. The key arrives in the link's #fragment,
+  // which the browser never sends to the server, and is kept only for this tab.
+  var KEY = '';
+  try { KEY = sessionStorage.getItem('demoKey') || ''; } catch(e) {}
+  var m = window.location.hash.match(/key=([^&]+)/);
+  if(m){
+    KEY = decodeURIComponent(m[1]);
+    try { sessionStorage.setItem('demoKey', KEY); } catch(e) {}
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+  }
+  var keybar = document.getElementById('keybar');
+  if(!KEY) keybar.classList.add('show');
+  keybar.addEventListener('submit', function(e){
+    e.preventDefault();
+    KEY = document.getElementById('keyinput').value.trim();
+    try { sessionStorage.setItem('demoKey', KEY); } catch(e2) {}
+    if(KEY) keybar.classList.remove('show');
+  });
+  function headers(){ return {'Content-Type':'application/json', 'X-Demo-Key': KEY}; }
+  function checkAuth(r){
+    if(r.status === 401){ keybar.classList.add('show'); throw new Error('Access key missing or wrong.'); }
+    return r;
+  }
 
   var BRIEFS = [
     { kw:'#seedance',         min:10000, why:'ElevenLabs’ own 2026 campaign hashtag for the Seedance video generator.' },
@@ -249,6 +281,7 @@
     ['Messaging', 'Telegram bot — packets, contracts, alerts'],
     ['Inbound', '8 webhook endpoints on this host'],
     ['Secrets', 'n8n credential store, nothing in workflow JSON'],
+    ['Access', 'X-Demo-Key header, checked against an n8n Data Table'],
     ['Failure path', 'Global error workflow → Telegram']
   ];
 
@@ -339,9 +372,10 @@
 
       fetch(ORIGIN + sec.path, {
         method:'POST',
-        headers:{'Content-Type':'application/json'},
+        headers: headers(),
         body: JSON.stringify(sec.body || {})
       })
+      .then(checkAuth)
       .then(function(r){ return r.json().catch(function(){ throw new Error('Workflow returned a non-JSON response (HTTP '+r.status+').'); }); })
       .then(function(d){
         clearInterval(timer);
@@ -417,8 +451,9 @@
       }, 100);
 
       fetch(ORIGIN + '/webhook/creator-discovery/run', {
-        method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
+        method:'POST', headers: headers(), body: JSON.stringify(body)
       })
+      .then(checkAuth)
       .then(function(r){ return r.json(); })
       .then(function(d){
         clearInterval(timer);
